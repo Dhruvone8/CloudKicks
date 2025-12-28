@@ -7,7 +7,8 @@ const bcrypt = require("bcrypt");
 require("dotenv").config();
 
 router.get("/panel", (req, res) => {
-    res.send("adminPanel");
+   let success= req.flash("success");
+    res.render("createproducts", { success });
 })
 
 if (process.env.NODE_ENV === "development") {
