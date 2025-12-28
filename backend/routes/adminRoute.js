@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router()
 const adminModel = require("../models/adminModel");
-const { handleAdminLogin } = require("../controllers/authController");
+const { handleLogin } = require("../controllers/authController");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
@@ -53,6 +53,6 @@ if (process.env.NODE_ENV === "development") {
     });
 }
 
-router.post("/login", handleAdminLogin);
+router.post("/login", handleLogin);
 
 module.exports = router

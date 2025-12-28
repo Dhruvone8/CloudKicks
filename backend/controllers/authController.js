@@ -1,4 +1,5 @@
 const userModel = require("../models/userModel");
+const adminModel = require("../models/adminModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
@@ -7,7 +8,7 @@ async function handleUserRegistration(req, res) {
         let { email, password, fullname } = req.body;
 
         // Check whether user exists or not
-        let user = await userModel.findOne({ email: email })
+        let user = await userModel.findOne({ email: email });
 
         // If user exists already, return
         if (user) return res.status(400).send("User Already Exists! Try Logging In");
@@ -22,45 +23,73 @@ async function handleUserRegistration(req, res) {
                         fullname
                     });
 
-                    let token = jwt.sign({ email, id: user._id }, process.env.JWT_SECRET);
+                    let token = jwt.sign({ email, id: user._id, role: 'user' }, process.env.JWT_SECRET);
                     res.cookie("token", token);
                     res.redirect("/shop");
                 }
-            })
-        })
+            });
+        });
     }
     catch (err) {
         res.send(err.message);
     }
 }
 
-async function handleUserLogin(req, res) {
-    let { email, password } = req.body;
+async function handleLogin(req, res) {
+    try {
+        let { email, password } = req.body;
 
-    // Check if user exists or not
-    let user = await userModel.findOne({ email: email });
+        // First, check if it's a user
+        let user = await userModel.findOne({ email: email });
 
-    // If user doesn't exist, return
-    if (!user) return res.status(400).send("User with this email doesn't exist");
+        if (user) {
+            // User found, verify password
+            bcrypt.compare(password, user.password, (err, result) => {
+                if (err) {
+                    return res.status(500).send("Something went wrong");
+                }
 
-    // If user exists, check if entered password is correct or not
-    bcrypt.compare(password, user.password, (err, result) => {
-        if (err) {
-            return res.status(500).send("Something went wrong");
+                if (!result) {
+                    return res.status(401).send("Invalid email or password");
+                }
+
+                // Password correct, generate token with role
+                let token = jwt.sign({ email, id: user._id, role: 'user' }, process.env.JWT_SECRET);
+                res.cookie("token", token);
+                return res.redirect("/shop");
+            });
+            return; // Important: prevent further execution
         }
 
-        // If password does not match
-        if (!result) {
-            return res.status(401).send("Invalid email or password");
+        // If not a user, check if it's an admin
+        let admin = await adminModel.findOne({ email: email });
+
+        if (admin) {
+            // Admin found, verify password
+            bcrypt.compare(password, admin.password, (err, result) => {
+                if (err) {
+                    return res.status(500).send("Something went wrong");
+                }
+
+                if (!result) {
+                    return res.status(401).send("Invalid email or password");
+                }
+
+                // Password correct, generate token with role
+                let token = jwt.sign({ email, id: admin._id, role: 'admin' }, process.env.JWT_SECRET);
+                res.cookie("token", token);
+                return res.redirect("/admin/panel");
+            });
+            return; // Important: prevent further execution
         }
 
-        //  If Password is correct, generate the JWT
-        let token = jwt.sign({ email, id: user._id }, process.env.JWT_SECRET);
+        // Neither user nor admin found
+        return res.status(400).send("No account found with this email");
 
-        // Store the JWT inside the cookie and send it to the user's browser
-        res.cookie("token", token);
-        res.redirect("/shop");
-    });
+    } catch (err) {
+        console.error("Login error:", err);
+        res.status(500).send("An error occurred during login");
+    }
 }
 
 async function handleLogout(req, res) {
@@ -68,29 +97,8 @@ async function handleLogout(req, res) {
     res.redirect("/");
 }
 
-async function handleAdminLogin(req, res) {
-    let { email, password } = req.body;
-
-    // Check if admin exists or not
-    let admin = await adminModel.findOne({ email: email });
-
-    // If admin doesn't exist, return
-    if (!admin) return res.status(400).send("Admin with this email doesn't exist");
-
-    // If admin exists, check if entered password is correct or not
-    bcrypt.compare(password, admin.password, (err, result) => {
-        if(err) {
-            return res.status(500).send("Something went wrong");
-        }
-
-        if(!result) {
-            return res.status(401).send("Invalid email or password");
-        }
-
-        let token = jwt.sign({ email, id: admin._id }, process.env.JWT_SECRET);
-        res.cookie("token", token);
-        res.redirect("/panel");
-    })
-}
-
-module.exports = { handleUserRegistration, handleUserLogin, handleLogout, handleAdminLogin };
+module.exports = {
+    handleUserRegistration,
+    handleLogin,
+    handleLogout
+};
