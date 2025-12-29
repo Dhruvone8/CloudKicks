@@ -1,5 +1,4 @@
 const userModel = require("../models/userModel");
-const adminModel = require("../models/adminModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
@@ -20,10 +19,11 @@ async function handleUserRegistration(req, res) {
                     let user = await userModel.create({
                         email,
                         password: hash,
-                        fullname
+                        fullname,
+                        role: 'normal' // Explicitly set role to normal
                     });
 
-                    let token = jwt.sign({ email, id: user._id, role: 'user' }, process.env.JWT_SECRET);
+                    let token = jwt.sign({ email, id: user._id, role: user.role }, process.env.JWT_SECRET);
                     res.cookie("token", token);
                     res.redirect("/shop");
                 }
@@ -39,52 +39,34 @@ async function handleLogin(req, res) {
     try {
         let { email, password } = req.body;
 
-        // First, check if it's a user
+        // Find user by email
         let user = await userModel.findOne({ email: email });
 
-        if (user) {
-            // User found, verify password
-            bcrypt.compare(password, user.password, (err, result) => {
-                if (err) {
-                    return res.status(500).send("Something went wrong");
-                }
-
-                if (!result) {
-                    return res.status(401).send("Invalid email or password");
-                }
-
-                // Password correct, generate token with role
-                let token = jwt.sign({ email, id: user._id, role: 'user' }, process.env.JWT_SECRET);
-                res.cookie("token", token);
-                return res.redirect("/shop");
-            });
-            return; // Important: prevent further execution
+        if (!user) {
+            return res.status(400).send("No account found with this email");
         }
 
-        // If not a user, check if it's an admin
-        let admin = await adminModel.findOne({ email: email });
+        // Verify password
+        bcrypt.compare(password, user.password, (err, result) => {
+            if (err) {
+                return res.status(500).send("Something went wrong");
+            }
 
-        if (admin) {
-            // Admin found, verify password
-            bcrypt.compare(password, admin.password, (err, result) => {
-                if (err) {
-                    return res.status(500).send("Something went wrong");
-                }
+            if (!result) {
+                return res.status(401).send("Invalid email or password");
+            }
 
-                if (!result) {
-                    return res.status(401).send("Invalid email or password");
-                }
+            // Password correct, generate token with role
+            let token = jwt.sign({ email, id: user._id, role: user.role }, process.env.JWT_SECRET);
+            res.cookie("token", token);
 
-                // Password correct, generate token with role
-                let token = jwt.sign({ email, id: admin._id, role: 'admin' }, process.env.JWT_SECRET);
-                res.cookie("token", token);
+            // Redirect based on role
+            if (user.role === 'admin') {
                 return res.redirect("/admin/panel");
-            });
-            return; // Important: prevent further execution
-        }
-
-        // Neither user nor admin found
-        return res.status(400).send("No account found with this email");
+            } else {
+                return res.redirect("/shop");
+            }
+        });
 
     } catch (err) {
         console.error("Login error:", err);

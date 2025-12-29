@@ -16,16 +16,28 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    cart: {
-        type: Array,
-        default: []
+    role: {
+        type: String,
+        enum: ['normal', 'admin'],
+        default: 'normal'
     },
+    cart: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+    }],
     orders: {
         type: Array,
         default: []
     },
     contact: Number,
     picture: String,
+    
+    // Admin-specific fields (only used when role is 'admin')
+    products: {
+        type: Array,
+        default: []
+    },
+    gstin: String
 });
 
 module.exports = mongoose.model("User", userSchema);
