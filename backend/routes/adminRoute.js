@@ -12,6 +12,7 @@ router.get("/panel", isAdmin, (req, res) => {
     res.render("createproducts", { success });
 });
 
+// Only 1 admin should be created
 if (process.env.NODE_ENV === "development") {
     router.post("/create", async (req, res) => {
         try {
