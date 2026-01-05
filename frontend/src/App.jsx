@@ -7,7 +7,7 @@ import Contact from "./pages/Contact";
 import Product from "./pages/Product";
 import Login from "./pages/Login";
 import Cart from "./pages/Cart";
-import PlaceOrder from "./pages/PlaceOrder";
+import Checkout from "./pages/CheckOut";
 import Orders from "./pages/Orders";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -40,7 +40,7 @@ const App = () => {
         <Route path="/product/:productId" element={<Product />} />
         <Route path="/login" element={<Login />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/placeOrder" element={<PlaceOrder />} />
+        <Route path="/checkout" element={<Checkout />} />
         <Route path="/orders" element={<Orders />} />
       </Routes>
       <Footer />

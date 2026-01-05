@@ -4,10 +4,10 @@ import Title from "../components/Title";
 import TextField from "@mui/material/TextField";
 import DeleteButton from "../components/delete-button";
 import { toast } from "sonner";
+import CartTotal from "../components/CartTotal";
 
 const Cart = () => {
-  const { products, currency, cartItems, updateQuantity } =
-    useContext(ShopContext);
+  const { products, currency, cartItems, updateQuantity, navigate } = useContext(ShopContext);
 
   const [cartData, setCartData] = useState([]);
 
@@ -101,6 +101,20 @@ const Cart = () => {
           </div>
         );
       })}
+
+      <div className="flex justify-end my-20">
+        <div className="w-full sm:w-[450px]">
+          <CartTotal />
+          <div className="w-full text-end">
+            <button onClick={() => navigate('/checkout')}
+              className="bg-black text-white py-3 rounded-md text-md my-8 px-8
+            cursor-pointer hover:scale-105 transition-smooth duration-400 w-full"
+            >
+              Proceed to Checkout
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
