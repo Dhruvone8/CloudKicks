@@ -2,13 +2,16 @@ import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
 import { assets } from "../assets/frontend_assets/assets";
+import RelatedProducts from "../components/RelatedProducts";
+import { toast } from "sonner";
+import Button from '@mui/material/Button';
 
 const Product = () => {
   const { productId } = useParams();
-  const { products, currency } = useContext(ShopContext);
+  const { products, currency, addToCart } = useContext(ShopContext);
   const [productData, setProductData] = useState(null);
   const [image, setImage] = useState("");
-  const [sizeButton, setSizeButton] = useState("");
+  const [size, setSize] = useState("");
 
   // Get Product data by Id
   const fetchProductData = async () => {
@@ -72,9 +75,9 @@ const Product = () => {
             <div className="flex gap-2">
               {productData.sizes.map((item, index) => (
                 <button
-                  onClick={() => setSizeButton(item)}
+                  onClick={() => setSize(item)}
                   className={`border py-2 px-4 bg-gray-50 hover:bg-gray-200 transition-colors duration-200 cursor-pointer ${
-                    sizeButton === item ? "border-orange-600" : ""
+                    size === item ? "border-orange-600" : ""
                   }`}
                   key={index}
                 >
@@ -83,11 +86,53 @@ const Product = () => {
               ))}
             </div>
           </div>
-           <button className="bg-black text-white py-3 cursor-pointer px-8 text-sm rounded-md active:bg-gray-700 transition-colors duration-200">
+          <Button variant="contained" color="primary"
+            onClick={() =>
+              toast.promise(addToCart(productData._id, size), {
+                loading: "Adding to cart...",
+                success: "Product added to cart 🛒",
+                error: (err) => err,
+              })
+            }
+            className="bg-black text-white py-3 cursor-pointer px-8 text-sm rounded-md active:bg-gray-700 transition-colors duration-200"
+          >
             ADD TO CART
-           </button>
-           <hr className="mt-4 sm:w-4/5 border-gray-300" />
+          </Button>
+
+          <hr className="mt-4 sm:w-4/5 border-gray-300" />
+          <div className="text-sm text-gray-500 mt-5 flex flex-col gap-1">
+            <p>100% Original Product</p>
+            <p>Cash on Delivery Accepted</p>
+            <p>Easy Returns and Exchange Policies within 7 Days</p>
+          </div>
         </div>
+      </div>
+
+      {/* Description and Reviews Section */}
+      <div className="mt-20">
+        <div className="flex">
+          <b className="border px-5 py-3 text-sm">Description</b>
+          <p className="border px-5 py-3 text-sm">Reviews (83)</p>
+        </div>
+        <div className="flex flex-col gap-4 border text-sm px-6 py-6 text-gray-500">
+          <p>
+            An e-commerce website is an online platform that facilitates the
+            buying and selling of products or services over the internet. It
+            serves as a virtual marketplace where buyers can discover, compare,
+            and purchase products directly from sellers. This platform provides
+            a seamless shopping experience with secure payment options and
+            reliable delivery services, making online shopping convenient and
+            accessible for customers worldwide.
+          </p>
+        </div>
+      </div>
+
+      {/* Related Products */}
+      <div className="mt-12">
+        <RelatedProducts
+          category={productData.category}
+          subcategory={productData.subcategory}
+        />
       </div>
     </div>
   ) : (

@@ -12,10 +12,24 @@ import Orders from "./pages/Orders";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import SearchBar from "./components/SearchBar";
+import { Toaster as SonnerToaster } from "sonner";
 
 const App = () => {
   return (
     <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[10vw]">
+      <SonnerToaster
+        richColors
+        position="bottom-right"
+        theme="dark"
+        closeButton
+        duration={3000}
+        toastOptions={{
+          style: {
+            borderRadius: '8px',
+            border: '1px solid #374151',
+          }
+        }}
+      />
       <Navbar />
       <SearchBar />
       <Routes>
