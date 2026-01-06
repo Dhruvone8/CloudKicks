@@ -38,6 +38,18 @@ const Orders = () => {
                   </p>
                 </div>
               </div>
+              <div className="md:w-1/2 flex justify-between">
+                <div className="flex items-center gap-2">
+                  <p className="min-w-2 h-2 rounded-full bg-green-500"></p>
+                  <p className="text-sm md:text-base">Ready To Ship</p>
+                </div>
+                <button
+                  className="bg-black text-white py-1.75 rounded-md text-md my-5 px-5
+              cursor-pointer hover:scale-105 transition-all duration-300 w-40 sm:w-auto shadow-md"
+                >
+                  Track Order
+                </button>
+              </div>
             </div>
           );
         })}
