@@ -1,13 +1,9 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
-const config = require("config")
 
 mongoose
-    .connect(`${config.get("MONGODB_URI")}/cloudKicks`)
-    .then(() => {
-        console.log("MongoDB Connection Established!!✅")
-    })
-    .catch((err) => {
-        console.log(err)
-    })
+  .connect(`${process.env.MONGODB_URI}/cloudKicks`)
+  .then(() => console.log("MongoDB Connection Established!! ✅"))
+  .catch((err) => console.error("MongoDB Error:", err));
 
 module.exports = mongoose.connection;
