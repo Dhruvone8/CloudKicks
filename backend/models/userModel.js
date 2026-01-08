@@ -1,43 +1,45 @@
 const mongoose = require("mongoose");
 
-const userSchema = mongoose.Schema({
-    fullname: {
-        type: String,
-        minLength: 3,
-        trim: true,
-        required: true
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      trim: true,
+      required: true
     },
     email: {
-        type: String,
-        required: true,
-        unique: true
+      type: String,
+      required: true,
+      unique: true
     },
     password: {
-        type: String,
-        required: true
+      type: String,
+      required: true
     },
     role: {
-        type: String,
-        enum: ['normal', 'admin'],
-        default: 'normal'
+      type: String,
+      enum: ["normal", "admin"],
+      default: "normal"
     },
-    cart: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-    }],
-    orders: {
-        type: Array,
-        default: []
-    },
-    contact: Number,
-    picture: String,
-    
-    // Admin-specific fields (only used when role is 'admin')
-    products: {
-        type: Array,
-        default: []
-    },
-    gstin: String
-});
+    cartData: [
+      {
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+          required: true
+        },
+        quantity: {
+          type: Number,
+          min: 1,
+          default: 1
+        },
+        size: {
+          type: String
+        }
+      }
+    ]
+  },
+  { timestamps: true }
+);
 
 module.exports = mongoose.model("User", userSchema);
