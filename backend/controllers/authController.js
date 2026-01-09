@@ -1,50 +1,82 @@
 const userModel = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const validator = require("validator");
 
 async function handleUserRegistration(req, res) {
     try {
-        let { email, password, fullname } = req.body;
+        let { email, password, name } = req.body;
 
-        // Check whether user exists or not
-        let user = await userModel.findOne({ email: email });
-
-        // If user exists already, return
-        if (user) {
-            req.flash("error", "User Already Exists! Try Logging In");
-            return res.redirect("/");
+        // Input Validation
+        if (!email || !password || !name) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required"
+            });
         }
 
-        bcrypt.genSalt(10, function (err, salt) {
-            bcrypt.hash(password, salt, async function (err, hash) {
-                if (err) return res.send(err.message);
-                else {
-                    let user = await userModel.create({
-                        email,
-                        password: hash,
-                        fullname,
-                        role: 'normal'
-                    });
-
-                    let token = jwt.sign(
-                        { email: user.email, id: user._id, role: user.role },
-                        process.env.JWT_SECRET,
-                        { expiresIn: "7d" }
-                    );
-
-                    res.cookie("token", token, {
-                        httpOnly: true,
-                        secure: process.env.NODE_ENV === "production"
-                    });
-                    res.redirect("/shop");
-                }
+        // Email Validation
+        if (!validator.isEmail(email)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid email address"
             });
+        }
+
+        // Password Validation
+        if (password.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 6 characters long"
+            });
+        }
+
+        // Check whether user exists or not
+        let userExists = await userModel.findOne({ email: email });
+
+        // If user exists already, return
+        if (userExists) {
+            return res.status(409).json({
+                success: false,
+                message: "User already exists. Try logging in."
+            });
+        }
+
+        // Hash Password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create User
+        let user = await userModel.create({
+            email,
+            password: hashedPassword,
+            name,
+            role: 'normal'
+        });
+
+        // Generate JWT
+        let token = jwt.sign(
+            { email: user.email, id: user._id, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: "7d" }
+        );
+
+        // Set Cookie
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production"
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: "User registered successfully"
         });
     }
     catch (err) {
         console.error("Registration error:", err);
-        req.flash("error", "An error occurred during registration");
-        res.redirect("/");
+        return res.status(500).json({
+            success: false,
+            message: "An error occurred during registration"
+        });
     }
 }
 
@@ -52,28 +84,39 @@ async function handleLogin(req, res) {
     try {
         let { email, password } = req.body;
 
+        // Validate Input
         if (!email || !password) {
-            req.flash("error", "Email and password are required");
-            return res.redirect("/");
+            return res.status(400).json({
+                success: false,
+                message: "Email and password are required"
+            });
         }
 
         // Find user by email
         let user = await userModel.findOne({ email: email });
 
+        // If user doesn't exist
         if (!user) {
-            req.flash("error", "Invalid email or password");
-            return res.redirect("/");
+            return res.status(401).json({
+                success: false,
+                message: "Invalid email or password"
+            });
         }
 
         // Verify password
         bcrypt.compare(password, user.password, (err, result) => {
             if (err) {
-                return res.status(500).send("Something went wrong");
+                return res.status(500).json({
+                    success: false,
+                    message: "Something went wrong"
+                });
             }
 
             if (!result) {
-                req.flash("error", "Invalid email or password");
-                return res.redirect("/");
+                return res.status(401).json({
+                    success: false,
+                    message: "Invalid email or password"
+                });
             }
 
             // Password correct, generate token with role
@@ -88,25 +131,29 @@ async function handleLogin(req, res) {
                 secure: process.env.NODE_ENV === "production"
             });
 
-            // Redirect based on role
-            if (user.role === 'admin') {
-                return res.redirect("/admin/panel");
-            } else {
-                return res.redirect("/shop");
-            }
+            // Send response to frontend
+            return res.status(200).json({
+                success: true,
+                message: "Login successful",
+                role: user.role
+            });
         });
 
     } catch (err) {
         console.error("Login error:", err);
-        req.flash("error", "An error occurred during login");
-        res.redirect("/");
+        return res.status(500).json({
+            success: false,
+            message: "An error occurred during login"
+        });
     }
 }
 
 async function handleLogout(req, res) {
     res.clearCookie("token");
-    req.flash("success", "Logged out successfully");
-    res.redirect("/");
+    return res.status(200).json({
+        success: true,
+        message: "Logged out successfully"
+    });
 }
 
 module.exports = {

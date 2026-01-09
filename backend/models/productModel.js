@@ -1,40 +1,63 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
-const productSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    image: {
-        type: Array,
-        required: true
-    },
-    price: {
-        type: Number,
-        required: true,
-        min: 0
-    },
-    category: {
-        type: String,
-        required: true
-    },
-    subCategory: {
-        type: String,
-        required: true
-    },
-    sizes: {
-        type: Array,
-        required: true
-    },
-    bestSeller: {
-        type: Boolean,
-        default: false
-    },
-    date: {
-        type: Number,
-        required: true
-    }
-})
+const productSchema = new mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: true,
+            trim: true
+        },
 
-module.exports = mongoose.model("Product", productSchema)
+        images: [
+            {
+                url: {
+                    type: String,
+                    required: true
+                },
+                public_id: {
+                    type: String,
+                    required: true
+                }
+            }
+        ],
+
+        price: {
+            type: Number,
+            required: true,
+            min: 0
+        },
+
+        category: {
+            type: String,
+            required: true,
+            index: true
+        },
+
+        subCategory: {
+            type: String,
+            required: true
+        },
+
+        sizes: [
+            {
+                size: {
+                    type: String,
+                    required: true
+                },
+                stock: {
+                    type: Number,
+                    required: true,
+                    min: 0
+                }
+            }
+        ],
+
+        bestSeller: {
+            type: Boolean,
+            default: false
+        }
+    },
+    { timestamps: true }
+);
+
+module.exports = mongoose.model("Product", productSchema);

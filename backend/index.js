@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
@@ -13,7 +14,6 @@ const productRoute = require("./routes/productRoute");
 const expressSession = require("express-session");
 const flash = require("connect-flash")
 const appRoute = require("./routes/appRoute")
-require("dotenv").config();
 const connectCloudinary = require("./config/cloudinary");
 connectCloudinary();
 
