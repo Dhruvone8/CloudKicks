@@ -110,8 +110,74 @@ const handleRemoveProduct = async (req, res) => {
     }
 }
 
+// Update a Product Information
+const handleUpdateProduct = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Find product
+        const product = await productModel.findById(id);
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found"
+            });
+        }
+
+        const {
+            name,
+            price,
+            category,
+            subCategory,
+            sizes,
+            bestSeller
+        } = req.body;
+
+        // Update only if provided
+        if (name !== undefined) product.name = name;
+        if (price !== undefined) product.price = price;
+        if (category !== undefined) product.category = category;
+        if (subCategory !== undefined) product.subCategory = subCategory;
+        if (bestSeller !== undefined) product.bestSeller = bestSeller;
+
+        // Handle sizes
+        if (sizes !== undefined) {
+            if (typeof sizes === "string") {
+                try {
+                    product.sizes = JSON.parse(sizes);
+                } catch (err) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Invalid sizes format"
+                    });
+                }
+            } else {
+                product.sizes = sizes;
+            }
+        }
+
+        // Save updated product
+        await product.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Product updated successfully",
+            product
+        });
+
+    } catch (error) {
+        console.error("Error updating product:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to update product"
+        });
+    }
+};
+
 module.exports = {
     handleAddProduct,
     handleListProducts,
-    handleRemoveProduct
+    handleRemoveProduct,
+    handleUpdateProduct
 }
