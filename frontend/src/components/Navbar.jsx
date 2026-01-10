@@ -3,7 +3,7 @@ import { assets } from "../assets/frontend_assets/assets";
 import { Link, NavLink } from "react-router-dom";
 import { useState, useContext } from "react";
 import { ShopContext } from "../context/ShopContext";
-import AuthDialog from "./AuthDialog";
+import AuthDialog from "./ui/authDialog";
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false);

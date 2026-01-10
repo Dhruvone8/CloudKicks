@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import Title from "../components/Title";
 import CartTotal from "../components/CartTotal";
 import { assets } from "../assets/frontend_assets/assets";
-import { SaveButton } from "@/components/status-button";
+import { SaveButton } from "@/components/ui/status-button";
 import { ShopContext } from "@/context/ShopContext";
 
 const Checkout = () => {

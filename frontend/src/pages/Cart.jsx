@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "../components/Title";
 import TextField from "@mui/material/TextField";
-import DeleteButton from "../components/delete-button";
+import DeleteButton from "../components/ui/delete-button";
 import { toast } from "sonner";
 import CartTotal from "../components/CartTotal";
 
