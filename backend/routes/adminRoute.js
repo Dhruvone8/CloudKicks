@@ -7,11 +7,6 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
 
-router.get("/panel", isAdmin, (req, res) => {
-    let success = req.flash("success");
-    res.render("createproducts", { success });
-});
-
 // Only 1 admin should be created
 if (process.env.NODE_ENV === "development") {
     router.post("/create", async (req, res) => {
@@ -68,4 +63,12 @@ if (process.env.NODE_ENV === "development") {
 // Admin login route
 router.post("/login", handleLogin);
 
+// Admin Panel
+router.get("/panel", isAdmin, (req, res) => {
+    let success = req.flash("success");
+    res.render("createproducts", { success });
+});
+
+// Admin Logout
+router.get("/logout", handleLogout);
 module.exports = router;
