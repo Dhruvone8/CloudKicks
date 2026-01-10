@@ -3,113 +3,116 @@ const userModel = require("../models/userModel");
 
 // Middleware to check if user is logged in
 async function isLoggedIn(req, res, next) {
-    // If the user trying to access the route does not have the token
-    if (!req.cookies.token) {
-        req.flash("error", "You need to login to access this page");
-        return res.redirect("/");
-    }
-
-    // If the user has the token
     try {
-        const decoded_user = jwt.verify(req.cookies.token, process.env.JWT_SECRET);
+        const token = req.cookies?.token;
 
-        // Don't fetch user's password from the database
+        // If the user is not logged in
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized"
+            });
+        }
+
+        const decoded_user = jwt.verify(token, process.env.JWT_SECRET);
+
         const user = await userModel.findOne({ email: decoded_user.email }).select("-password");
 
-        // If the user doesn't exist
+        // If the token is valid but the user doesn't exist
         if (!user) {
-            req.flash("error", "User not found. Please login again.");
-            return res.redirect("/");
+            return res.status(401).json({
+                success: false,
+                message: "User not found"
+            });
         }
 
         req.user = user;
         next();
-    }
-    catch (err) {
-        if (err.name === "TokenExpiredError") {
-            req.flash("error", "Session expired. Please login again.");
-        } else {
-            req.flash("error", "Invalid token. Please login again.");
-        }
-        return res.redirect("/");
+    } catch (err) {
+        return res.status(401).json({
+            success: false,
+            message: "Invalid or expired token"
+        });
     }
 }
 
 // Middleware to check if user is an admin
 async function isAdmin(req, res, next) {
-    // First check if user is logged in
-    if (!req.cookies.token) {
-        req.flash("error", "You need to login to access this page");
-        return res.redirect("/");
-    }
-
     try {
-        const decoded_user = jwt.verify(req.cookies.token, process.env.JWT_SECRET);
+        const token = req.cookies?.token;
 
-        // Fetch user without password
-        const user = await userModel.findOne({ email: decoded_user.email }).select("-password");
-
-        // If the user doesn't exist
-        if (!user) {
-            req.flash("error", "User not found. Please login again.");
-            return res.redirect("/");
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: "Authentication required"
+            });
         }
 
-        // Check if user has admin role
-        if (user.role !== 'admin') {
-            req.flash("error", "You don't have permission to access this page");
-            return res.redirect("/shop");
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const user = await userModel.findOne({ email: decoded.email }).select("-password");
+
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        if (user.role != "admin") {
+            return res.status(401).json({
+                success: false,
+                message: "Admin Access Required"
+            });
         }
 
         req.user = user;
         next();
-    }
-    catch (err) {
-        if (err.name === "TokenExpiredError") {
-            req.flash("error", "Session expired. Please login again.");
-        } else {
-            req.flash("error", "Invalid token. Please login again.");
-        }
-        return res.redirect("/");
+    } catch (err) {
+        return res.status(401).json({
+            success: false,
+            message: "Invalid or expired token"
+        });
     }
 }
 
 // Middleware to check if user is a normal user (not admin)
 async function isNormalUser(req, res, next) {
-    // First check if user is logged in
-    if (!req.cookies.token) {
-        req.flash("error", "You need to login to access this page");
-        return res.redirect("/");
-    }
-
     try {
-        const decoded_user = jwt.verify(req.cookies.token, process.env.JWT_SECRET);
+        const token = req.cookies?.token
 
-        // Fetch user without password
-        const user = await userModel.findOne({ email: decoded_user.email }).select("-password");
-
-        // If the user doesn't exist
-        if (!user) {
-            req.flash("error", "User not found. Please login again.");
-            return res.redirect("/");
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: "Authentication required"
+            });
         }
 
-        // Check if user has normal role
-        if (user.role !== 'normal') {
-            req.flash("error", "This page is only accessible to regular users");
-            return res.redirect("/admin/panel");
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const user = await userModel.findOne({ email: decoded.email }).select("-password");
+
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: "User Not Found"
+            });
+        }
+
+        if (user.role !== "normal") {
+            return res.status(401).json({
+                success: false,
+                message: "Normal User Access Required"
+            });
         }
 
         req.user = user;
         next();
-    }
-    catch (err) {
-        if (err.name === "TokenExpiredError") {
-            req.flash("error", "Session expired. Please login again.");
-        } else {
-            req.flash("error", "Invalid token. Please login again.");
-        }
-        return res.redirect("/");
+    } catch (err) {
+        return res.status(401).json({
+            success: false,
+            message: "Invalid or expired token"
+        });
     }
 }
 
