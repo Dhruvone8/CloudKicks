@@ -17,7 +17,7 @@ if (process.env.NODE_ENV === "development") {
                 return res.status(403).send("An admin already exists. You don't have permission to create another admin");
             }
 
-            const { fullname, email, password } = req.body;
+            const { name, email, password } = req.body;
 
             // Check if email already exists
             const userExists = await userModel.findOne({ email });
@@ -28,7 +28,7 @@ if (process.env.NODE_ENV === "development") {
             const hashedPassword = await bcrypt.hash(password, 10);
 
             const createdAdmin = await userModel.create({
-                fullname,
+                name,
                 email,
                 password: hashedPassword,
                 role: 'admin' // Set role to admin
@@ -49,7 +49,7 @@ if (process.env.NODE_ENV === "development") {
                 message: "Admin created successfully",
                 admin: {
                     id: createdAdmin._id,
-                    fullname,
+                    name,
                     email,
                     role: createdAdmin.role
                 }
@@ -63,12 +63,7 @@ if (process.env.NODE_ENV === "development") {
 // Admin login route
 router.post("/login", handleLogin);
 
-// Admin Panel
-router.get("/panel", isAdmin, (req, res) => {
-    let success = req.flash("success");
-    res.render("createproducts", { success });
-});
-
 // Admin Logout
 router.get("/logout", handleLogout);
+
 module.exports = router;

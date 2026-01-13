@@ -45,14 +45,10 @@ const Cart = () => {
           return (
             <div
               key={uniqueId}
-              // --- LAYOUT FIX ---
-              // Mobile: grid-cols-2 (Creates 2 rows automatically)
-              // Desktop: grid-cols-[4fr_1fr_0.5fr] (Keeps everything in 1 row)
               className="py-4 border-t border-b text-gray-700 grid 
               grid-cols-2 sm:grid-cols-[4fr_1fr_0.5fr] 
               items-center gap-4"
             >
-              {/* 1. Product Info: Spans 2 cols on mobile (full width), 1 col on desktop */}
               <div className="col-span-2 sm:col-span-1 flex items-start gap-4">
                 <img
                   src={productData.image[0]}
@@ -75,8 +71,6 @@ const Cart = () => {
                 </div>
               </div>
 
-              {/* 2. Quantity Input */}
-              {/* Mobile: Standard grid cell. Desktop: Center aligned */}
               <div className="flex justify-start sm:justify-center">
                 <TextField
                   type="number"
@@ -89,14 +83,11 @@ const Cart = () => {
                   }
                   sx={{ 
                     width: "80px",
-                    // Fix styling to ensure label doesn't overlap text
                     "& .MuiInputBase-root": { backgroundColor: "white" }
                   }}
                 />
               </div>
 
-              {/* 3. Delete Button */}
-              {/* Mobile: Aligns right. Desktop: Center/End aligned */}
               <div className="flex justify-end sm:justify-center">
                 <DeleteButton
                   id={uniqueId}

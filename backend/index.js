@@ -13,14 +13,13 @@ const userRoute = require("./routes/userRoute");
 const productRoute = require("./routes/productRoute");
 const expressSession = require("express-session");
 const flash = require("connect-flash")
-const appRoute = require("./routes/appRoute")
 const connectCloudinary = require("./config/cloudinary");
 connectCloudinary();
 
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors()); 
+app.use(cors());
 app.use(cookieParser());
 app.use(
     expressSession({
@@ -37,8 +36,6 @@ app.set("view engine", "ejs")
 app.use("/admin", adminRoute)
 app.use("/users", userRoute)
 app.use("/products", productRoute)
-
-app.use("/", appRoute);
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port} ✅`)
