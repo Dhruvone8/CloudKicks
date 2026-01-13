@@ -13,16 +13,16 @@ const App = () => {
 
   useEffect(() => {
     if (token) {
-      localStorage.setItem("admin", token);
+      localStorage.setItem("adminToken", token);
     } else {
-      localStorage.removeItem("admin");
+      localStorage.removeItem("adminToken");
     }
   }, [token]);
 
   return (
     <div className="bg-gray-50 min-h-screen">
       {token === "" ? (
-        <AdminLogin />
+        <AdminLogin setToken={setToken} />
       ) : (
         <>
           <AdminNavbar />

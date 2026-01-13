@@ -3,7 +3,7 @@ import axios from "axios";
 import { backendUrl } from "../App";
 import { toast } from "sonner";
 
-const AdminLogin = () => {
+const AdminLogin = ({setToken}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
