@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminNavbar from "./components/AdminNavbar";
 import AdminSidebar from "./components/AdminSidebar";
 import { Routes, Route } from "react-router-dom";
@@ -9,8 +9,15 @@ import AdminLogin from "./components/AdminLogin";
 export const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const App = () => {
-  const [token, setToken] = useState("");
+  const [token, setToken] = useState(localStorage.getItem("adminToken") || "");
 
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem("admin", token);
+    } else {
+      localStorage.removeItem("admin");
+    }
+  }, [token]);
 
   return (
     <div className="bg-gray-50 min-h-screen">

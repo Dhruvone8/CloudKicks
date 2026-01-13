@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { backendUrl } from "../App";
+import { toast } from "sonner";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -9,9 +10,28 @@ const AdminLogin = () => {
   const onSubmitHandler = async (e) => {
     try {
       e.preventDefault();
-      const response = await axios.post(backendUrl + "/admin/login", {email, password})
+      const response = await axios.post(
+        backendUrl + "/admin/login",
+        { email, password },
+        { withCredentials: true } // Receive Cookies From Backend
+      );
 
-    } catch (err) {}
+      if(response.data.success) {
+        if(response.data.role !== "admin") {
+          toast.error("Access Denied. Admin privileges required");
+          return;
+        }
+        setToken(response.data.token);
+        toast.success("Login successful!");
+      }
+      else {
+        console.error(response.data.message);
+        toast.error(response.data.message || "Login Failed");
+      }      
+    } catch (err) {
+      console.error(err);
+      toast.error("Login failed");
+    }
   };
 
   return (
