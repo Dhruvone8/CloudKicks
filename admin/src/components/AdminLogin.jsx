@@ -10,7 +10,6 @@ const AdminLogin = () => {
     try {
       e.preventDefault();
       const response = await axios.post(backendUrl + "/admin/login", {email, password})
-      console.log(response);
 
     } catch (err) {}
   };

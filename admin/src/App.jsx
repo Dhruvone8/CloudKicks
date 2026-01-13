@@ -12,7 +12,6 @@ const App = () => {
   const [token, setToken] = useState("");
 
 
-
   return (
     <div className="bg-gray-50 min-h-screen">
       {token === "" ? (
