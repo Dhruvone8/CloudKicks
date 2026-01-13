@@ -3,7 +3,7 @@ import axios from "axios";
 import { backendUrl } from "../App";
 import { toast } from "sonner";
 
-const AdminLogin = ({setToken}) => {
+const AdminLogin = ({ setToken }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -16,18 +16,17 @@ const AdminLogin = ({setToken}) => {
         { withCredentials: true } // Receive Cookies From Backend
       );
 
-      if(response.data.success) {
-        if(response.data.role !== "admin") {
+      if (response.data.success) {
+        if (response.data.role !== "admin") {
           toast.error("Access Denied. Admin privileges required");
           return;
         }
         setToken(response.data.token);
         toast.success("Login successful!");
-      }
-      else {
+      } else {
         console.error(response.data.message);
         toast.error(response.data.message || "Login Failed");
-      }      
+      }
     } catch (err) {
       console.error(err);
       toast.error("Login failed");
