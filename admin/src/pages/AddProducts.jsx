@@ -1,29 +1,111 @@
-import React from "react";
+import React, { useState } from "react";
 import { assets } from "../admin_assets/assets";
 import { SaveButton } from "@/components/ui/status-button";
 import { toast } from "sonner";
+import { StepOutFreeIcons } from "@hugeicons/core-free-icons/index";
 
 const AddProducts = () => {
+  const [images, setImages] = useState([]);
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState(0);
+  const [category, setCategory] = useState("Men");
+  const [subCategory, setSubCategory] = useState("Casual");
+  const [bestSeller, setBestSeller] = useState(false);
+  const [sizes, setSizes] = useState([{ size: "UK-7", stock: 0 }]);
+
+  // Handle File Selection
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+
+    if (files.length + images.length > 4) {
+      toast.error("You can upload max 4 images");
+      return;
+    }
+
+    setImages((prev) => [...prev, ...files]);
+  };
+
+  // Delete image
+  const removeImage = (index) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Toggle Size Selection
+  const toggleSize = (size) => {
+    setSizes((prev) => {
+      const exists = prev.find((s) => s.size === size);
+
+      if (exists) {
+        // Remove size if already selected
+        return prev.filter((s) => s.size !== size);
+      } else {
+        return [...prev, { size, stock: 0 }];
+      }
+    });
+  };
+
+  // Highlight the selected size
+  const isSelected = (size) => {
+    return sizes.some((s) => s.size === size);
+  };
+
   return (
     <form className="flex flex-col w-full items-start gap-3">
       <p className="mb-2">Upload Product Image (max 4)</p>
-      <div className="flex gap-2">
-        <label htmlFor="images">
-          <img
-            className=" pt-2 w-30 cursor-pointer hover:scale-105 transition-smooth duration-300 ease-in-out"
-            src={assets.upload_area}
-            alt="Upload Area"
-          />
-          <input
-            type="file"
-            id="images"
-            name="images"
-            accept="image/*"
-            multiple
-            hidden
-            onChange={(e) => setImages(e.target.files)}
-          />
-        </label>
+      <div className="flex gap-2 flex-wrap">
+        {images.length === 0 && (
+          <label htmlFor="images">
+            <img
+              className=" pt-2 w-30 cursor-pointer hover:scale-105 transition-smooth duration-300 ease-in-out"
+              src={assets.upload_area}
+              alt="Upload Area"
+            />
+            <input
+              type="file"
+              id="images"
+              name="images"
+              accept="image/*"
+              multiple
+              hidden
+              onChange={handleImageChange}
+            />
+          </label>
+        )}
+
+        {images.map((img, index) => (
+          <div key={index} className="relative">
+            <img
+              src={URL.createObjectURL(img)}
+              alt={`Product ${index}`}
+              className="w-24 h-24 object-cover rounded border"
+            />
+            <button
+              type="button"
+              className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center"
+              onClick={() => removeImage(index)}
+            >
+              &times;
+            </button>
+          </div>
+        ))}
+        {images.length < 4 && (
+          <label htmlFor="images">
+            <img
+              className="pt-2 w-30 cursor-pointer hover:scale-105 transition:smooth duration-300 ease-in-out"
+              src={assets.upload_area}
+              alt="Upload More"
+            />
+            <input
+              type="file"
+              name="images"
+              id="images"
+              accept="image/*"
+              multiple
+              hidden
+              onChange={handleImageChange}
+            />
+          </label>
+        )}
       </div>
       <div className="w-1/4">
         <p className="mb-2">Product Name</p>
@@ -32,20 +114,30 @@ const AddProducts = () => {
           type="text"
           placeholder="Type Here"
           required
+          onChange={(e) => {
+            setName(e.target.value);
+          }}
+          value={name}
         />
       </div>
 
       <div className="flex flex-col sm:flex-row gap-2 w-full sm:gap-8">
         <div>
           <p className="mb-2">Product Category</p>
-          <select className="w-full px-3 py-2">
+          <select
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full px-3 py-2"
+          >
             <option value="Men">Men</option>
             <option value="Women">Women</option>
           </select>
         </div>
         <div>
           <p className="mb-2">Sub-Category</p>
-          <select className="w-full px-3 py-2">
+          <select
+            onChange={(e) => setSubCategory(e.target.value)}
+            className="w-full px-3 py-2"
+          >
             <option value="Casual">Casual</option>
             <option value="Sports">Sports</option>
             <option value="Formal">Formal</option>
@@ -55,6 +147,8 @@ const AddProducts = () => {
         <div>
           <p className="mb-2">Product Price</p>
           <input
+            onChange={(e) => setPrice(e.target.value)}
+            value={price}
             className="w-full px-3 py-2 sm:w-[120px]"
             type="Number"
             placeholder="999"
@@ -65,22 +159,18 @@ const AddProducts = () => {
 
       <div>
         <p className="mb-2">Product Sizes</p>
+
         <div className="flex gap-3">
-          <div>
-            <p className="bg-slate-200 px-3 py-1 cursor-pointer">UK-5</p>
-          </div>
-          <div>
-            <p className="bg-slate-200 px-3 py-1 cursor-pointer">UK-6</p>
-          </div>
-          <div>
-            <p className="bg-slate-200 px-3 py-1 cursor-pointer">UK-7</p>
-          </div>
-          <div>
-            <p className="bg-slate-200 px-3 py-1 cursor-pointer">UK-8</p>
-          </div>
-          <div>
-            <p className="bg-slate-200 px-3 py-1 cursor-pointer">UK-9</p>
-          </div>
+          {["UK-5", "UK-6", "UK-7", "UK-8", "UK-9"].map((size) => (
+            <div
+              key={size}
+              onClick={() => toggleSize(size)}
+              className={`px-3 py-1 cursor-pointer border rounded
+          ${isSelected(size) ? "bg-black text-white" : "bg-slate-200"}`}
+            >
+              {size}
+            </div>
+          ))}
         </div>
       </div>
 

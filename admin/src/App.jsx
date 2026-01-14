@@ -9,6 +9,7 @@ import AdminLogin from "./components/AdminLogin";
 export const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const App = () => {
+
   const [token, setToken] = useState(localStorage.getItem("adminToken") || "");
 
   useEffect(() => {
