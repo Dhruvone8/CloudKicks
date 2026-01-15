@@ -6,7 +6,7 @@ import { StepOutFreeIcons } from "@hugeicons/core-free-icons/index";
 import axios from "axios";
 import { backendUrl } from "../App";
 
-const AddProducts = () => {
+const AddProducts = ({ token }) => {
   const [images, setImages] = useState([]);
   const [name, setName] = useState("");
   const [price, setPrice] = useState(0);
@@ -67,7 +67,11 @@ const AddProducts = () => {
         formData.append("images", image);
       });
 
-      const response = await axios.post(backendUrl + "/products/add", formData);
+      const response = await axios.post(
+        backendUrl + "/products/add",
+        formData,
+        { withCredentials: true }
+      );
 
       console.log(response.data);
 
