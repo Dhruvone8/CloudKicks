@@ -39,7 +39,15 @@ async function isLoggedIn(req, res, next) {
 // Middleware to check if user is an admin
 async function isAdmin(req, res, next) {
     try {
-        const token = req.cookies?.token;
+        // Check for token in cookies first, then in Authorization header
+        let token = req.cookies?.token;
+
+        if (!token) {
+            const authHeader = req.headers.authorization;
+            if (authHeader && authHeader.startsWith('Bearer ')) {
+                token = authHeader.substring(7);
+            }
+        }
 
         if (!token) {
             return res.status(401).json({
@@ -59,8 +67,8 @@ async function isAdmin(req, res, next) {
             });
         }
 
-        if (user.role != "admin") {
-            return res.status(401).json({
+        if (user.role !== "admin") {
+            return res.status(403).json({
                 success: false,
                 message: "Admin Access Required"
             });
@@ -69,6 +77,7 @@ async function isAdmin(req, res, next) {
         req.user = user;
         next();
     } catch (err) {
+        console.error("Auth error:", err);
         return res.status(401).json({
             success: false,
             message: "Invalid or expired token"

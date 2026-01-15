@@ -70,14 +70,19 @@ const AddProducts = ({ token }) => {
       const response = await axios.post(
         backendUrl + "/products/add",
         formData,
-        { withCredentials: true }
+        {
+          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       console.log(response.data);
-
       toast.success("Product added successfully");
     } catch (error) {
-      toast.error("Something went wrong");
+      console.error(error);
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
 

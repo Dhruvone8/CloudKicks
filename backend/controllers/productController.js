@@ -22,6 +22,15 @@ const handleAddProduct = async (req, res) => {
             });
         }
 
+        // Check if product already exists
+        const existingProduct = await productModel.findOne({ name });
+        if (existingProduct) {
+            return res.status(400).json({
+                success: false,
+                message: "Product with this name already exists"
+            });
+        }
+
         // Upload the images to cloudinary
         const images = []
         for (const file of req.files) {
