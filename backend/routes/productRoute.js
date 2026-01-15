@@ -6,7 +6,7 @@ const { isAdmin } = require("../middlewares/checkAuth");
 const { handleAddProduct, handleListProducts, handleRemoveProduct, handleUpdateProduct } = require("../controllers/productController");
 
 // Add product - only admins can create products
-router.post("/add", upload.array("images", 4), handleAddProduct);
+router.post("/add", isAdmin, upload.array("images", 4), handleAddProduct);
 
 // List all Products - only admins can list products
 router.get("/list", isAdmin, handleListProducts);

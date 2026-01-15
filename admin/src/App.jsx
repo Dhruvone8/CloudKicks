@@ -7,9 +7,9 @@ import ListProducts from "./pages/ListProducts";
 import Orders from "./pages/Orders";
 import AdminLogin from "./components/AdminLogin";
 export const backendUrl = import.meta.env.VITE_BACKEND_URL;
+import { Toaster } from "sonner";
 
 const App = () => {
-
   const [token, setToken] = useState(localStorage.getItem("adminToken") || "");
 
   useEffect(() => {
@@ -22,6 +22,7 @@ const App = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
+      <Toaster richColors position="top-right" />
       {token === "" ? (
         <AdminLogin setToken={setToken} />
       ) : (

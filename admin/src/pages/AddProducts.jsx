@@ -3,6 +3,8 @@ import { assets } from "../admin_assets/assets";
 import { SaveButton } from "@/components/ui/status-button";
 import { toast } from "sonner";
 import { StepOutFreeIcons } from "@hugeicons/core-free-icons/index";
+import axios from "axios";
+import { backendUrl } from "../App";
 
 const AddProducts = () => {
   const [images, setImages] = useState([]);
@@ -49,8 +51,37 @@ const AddProducts = () => {
     return sizes.some((s) => s.size === size);
   };
 
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+
+    try {
+      const formData = new FormData();
+
+      formData.append("name", name);
+      formData.append("price", price.toString());
+      formData.append("category", category);
+      formData.append("subCategory", subCategory);
+      formData.append("bestSeller", bestSeller ? "true" : "false");
+      formData.append("sizes", JSON.stringify(sizes));
+      images.forEach((image) => {
+        formData.append("images", image);
+      });
+
+      const response = await axios.post(backendUrl + "/products/add", formData);
+
+      console.log(response.data);
+
+      toast.success("Product added successfully");
+    } catch (error) {
+      toast.error("Something went wrong");
+    }
+  };
+
   return (
-    <form className="flex flex-col w-full items-start gap-3">
+    <form
+      onSubmit={onSubmitHandler}
+      className="flex flex-col w-full items-start gap-3"
+    >
       <p className="mb-2">Upload Product Image (max 4)</p>
       <div className="flex gap-2 flex-wrap">
         {images.length === 0 && (
@@ -175,15 +206,23 @@ const AddProducts = () => {
       </div>
 
       <div className="flex gap-2 mt-2">
-        <input type="checkbox" id="bestSeller" />
+        <input
+          onChange={(e) => setBestSeller((prev) => !prev)}
+          checked={bestSeller}
+          type="checkbox"
+          id="bestSeller"
+        />
         <label className="cursor-pointer" htmlFor="bestSeller">
           Add to Best Seller
         </label>
       </div>
 
-      <SaveButton
-        onComplete={() => toast.success("Product added successfully")}
-      />
+      <button
+        className="bg-black text-white py-2 rounded-md text-md my-6 px-6
+              cursor-pointer hover:scale-105 transition-all duration-300 w-full sm:w-auto shadow-md"
+      >
+        Add Product
+      </button>
     </form>
   );
 };
