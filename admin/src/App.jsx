@@ -8,6 +8,7 @@ import Orders from "./pages/Orders";
 import AdminLogin from "./components/AdminLogin";
 export const backendUrl = import.meta.env.VITE_BACKEND_URL;
 import { Toaster } from "sonner";
+export const currency = "₹";
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem("adminToken") || "");

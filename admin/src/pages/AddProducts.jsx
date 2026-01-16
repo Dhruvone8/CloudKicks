@@ -54,15 +54,26 @@ const AddProducts = ({ token }) => {
   const onSubmitHandler = async (e) => {
     e.preventDefault();
 
+    // Validation
+    if (images.length === 0) {
+      toast.error("Please upload at least one image");
+      return;
+    }
+
+    if (sizes.length === 0) {
+      toast.error("Please select at least one size");
+      return;
+    }
+
     try {
       const formData = new FormData();
-
       formData.append("name", name);
       formData.append("price", price.toString());
       formData.append("category", category);
       formData.append("subCategory", subCategory);
       formData.append("bestSeller", bestSeller ? "true" : "false");
       formData.append("sizes", JSON.stringify(sizes));
+
       images.forEach((image) => {
         formData.append("images", image);
       });
@@ -71,19 +82,35 @@ const AddProducts = ({ token }) => {
         backendUrl + "/products/add",
         formData,
         {
-          withCredentials: true,
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      console.log(response.data);
       toast.success("Product added successfully");
+
+      // Reset form
+      setImages([]);
+      setName("");
+      setPrice(0);
+      setSizes([]);
     } catch (error) {
-      console.error(error);
       toast.error(error.response?.data?.message || "Something went wrong");
     }
+  };
+
+  const updateStock = (size, stock) => {
+    setSizes((prev) =>
+      prev.map((s) =>
+        s.size === size ? { ...s, stock: parseInt(stock) || 0 } : s
+      )
+    );
+  };
+
+  const getStock = (size) => {
+    const sizeData = sizes.find((s) => s.size === size);
+    return sizeData ? sizeData.stock : 0;
   };
 
   return (
@@ -213,6 +240,31 @@ const AddProducts = ({ token }) => {
           ))}
         </div>
       </div>
+
+      {/* Stock Management Section */}
+      {sizes.length > 0 && (
+        <div className="w-full">
+          <p className="mb-2 font-semibold">Stock Management</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            {sizes.map((sizeData) => (
+              <div key={sizeData.size} className="flex flex-col gap-2">
+                <label className="text-sm font-medium">{sizeData.size}</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={sizeData.stock}
+                  onChange={(e) => updateStock(sizeData.size, e.target.value)}
+                  className="px-3 py-2 border rounded"
+                  placeholder="Stock qty"
+                />
+              </div>
+            ))}
+          </div>
+          <p className="text-sm text-gray-500 mt-2">
+            Total Stock: {sizes.reduce((acc, s) => acc + s.stock, 0)} units
+          </p>
+        </div>
+      )}
 
       <div className="flex gap-2 mt-2">
         <input

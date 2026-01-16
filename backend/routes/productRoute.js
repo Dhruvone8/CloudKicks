@@ -8,8 +8,8 @@ const { handleAddProduct, handleListProducts, handleRemoveProduct, handleUpdateP
 // Add product - only admins can create products
 router.post("/add", isAdmin, upload.array("images", 4), handleAddProduct);
 
-// List all Products - only admins can list products
-router.get("/list", isAdmin, handleListProducts);
+// List all Products
+router.get("/list", handleListProducts);
 
 // Remove product - only admins can remove products
 router.delete("/remove/:id", isAdmin, handleRemoveProduct);
