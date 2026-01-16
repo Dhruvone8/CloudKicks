@@ -4,7 +4,7 @@ import { ShopContext } from "../context/ShopContext";
 import { assets } from "../assets/frontend_assets/assets";
 import RelatedProducts from "../components/RelatedProducts";
 import { toast } from "sonner";
-import Button from '@mui/material/Button';
+import Button from "@mui/material/Button";
 
 const Product = () => {
   const { productId } = useParams();
@@ -73,20 +73,36 @@ const Product = () => {
           <div className="flex flex-col gap-4 my-8">
             <p>Select Size</p>
             <div className="flex gap-2">
-              {productData.sizes.map((item, index) => (
-                <button
-                  onClick={() => setSize(item)}
-                  className={`border py-2 px-4 bg-gray-50 hover:bg-gray-200 transition-colors duration-200 cursor-pointer ${
-                    size === item ? "border-orange-600" : ""
-                  }`}
-                  key={index}
-                >
-                  {item}
-                </button>
-              ))}
+              {productData.sizes.map((item, index) => {
+                // Extract the size value - handle both string and object formats
+                const sizeValue = typeof item === "string" ? item : item.size;
+                const stockValue = typeof item === "object" ? item.stock : null;
+
+                return (
+                  <button
+                    onClick={() => setSize(sizeValue)}
+                    className={`border py-2 px-4 bg-gray-50 hover:bg-gray-200 transition-colors duration-200 cursor-pointer ${
+                      size === sizeValue ? "border-orange-600" : ""
+                    } ${
+                      stockValue === 0 ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                    key={index}
+                    disabled={stockValue === 0}
+                  >
+                    {sizeValue}
+                    {stockValue !== null && stockValue === 0 && (
+                      <span className="text-xs block text-red-500">
+                        Out of Stock
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
-          <Button variant="contained" color="primary"
+          <Button
+            variant="contained"
+            color="primary"
             onClick={() =>
               toast.promise(addToCart(productData._id, size), {
                 loading: "Adding to cart...",
@@ -131,7 +147,7 @@ const Product = () => {
       <div className="mt-12">
         <RelatedProducts
           category={productData.category}
-          subcategory={productData.subcategory}
+          subcategory={productData.subCategory}
         />
       </div>
     </div>
