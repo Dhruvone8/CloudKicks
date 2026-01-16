@@ -84,7 +84,12 @@ const ShopContextProvider = (props) => {
     try {
       const response = await axios.get(`${backendUrl}/products/list`);
       if (response.data.success) {
-        setProducts(response.data.products);
+        // Transform images array to match frontend expectations
+        const transformedProducts = response.data.products.map((product) => ({
+          ...product,
+          image: product.images.map((img) => img.url),
+        }));
+        setProducts(transformedProducts);
       } else {
         toast.error("Failed to fetch products");
       }
