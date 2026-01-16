@@ -46,6 +46,11 @@ const ListProducts = () => {
     }
   };
 
+  const getTotalStock = (sizes) => {
+    if (!sizes || !Array.isArray(sizes)) return 0;
+    return sizes.reduce((total, size) => total + (size.stock || 0), 0);
+  };
+
   useEffect(() => {
     fetchList();
   }, []);
@@ -108,7 +113,7 @@ const ListProducts = () => {
               {/* Stock */}
               <div>
                 <span className="md:hidden text-gray-400 text-xs">Stock</span>
-                <p>{item.stock}</p>
+                <p>{getTotalStock(item.sizes)}</p>
               </div>
 
               {/* Action */}

@@ -172,7 +172,7 @@ export const products = [
         image: [shoe11],
         category: "Men",
         subCategory: "Formal",
-        sizes: ["UK-7", "UK-8", "UK-9", "UK-10"],
+        sizes: ["UK-7", "UK-8", "UK-9"],
         date: 1716623345448,
         bestseller: true
     },
@@ -292,8 +292,8 @@ export const products = [
         price: 6500,
         image: [shoe22],
         category: "Men",
-        subCategory: "Bottomwear",
-        sizes: ["UK-6", "UK-7", "UK-8", "UK-9"],
+        subCategory: "Casual",
+        sizes: ["UK-7", "UK-8", "UK-9", "UK-10"],
         date: 1716635445448,
         bestseller: true
     }

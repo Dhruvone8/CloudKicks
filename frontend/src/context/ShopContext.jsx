@@ -1,17 +1,19 @@
-import { createContext, useState } from "react";
-import { products } from "../assets/frontend_assets/assets";
+import { createContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export const ShopContext = createContext();
 
 const ShopContextProvider = (props) => {
   const currency = "₹";
   const deliveryFee = 7;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [cartItems, setcartItems] = useState({});
   const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
 
   const addToCart = (itemId, size) => {
     return new Promise((resolve, reject) => {
@@ -78,6 +80,24 @@ const ShopContextProvider = (props) => {
     return totalAmount;
   };
 
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get(`${backendUrl}/products/list`);
+      if (response.data.success) {
+        setProducts(response.data.products);
+      } else {
+        toast.error("Failed to fetch products");
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      toast.error("Failed to load products");
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
   const value = {
     products,
     currency,
@@ -93,6 +113,7 @@ const ShopContextProvider = (props) => {
     updateQuantity,
     getCartTotal,
     navigate,
+    backendUrl,
   };
 
   return (

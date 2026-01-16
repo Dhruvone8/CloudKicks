@@ -228,7 +228,7 @@ const AddProducts = ({ token }) => {
         <p className="mb-2">Product Sizes</p>
 
         <div className="flex gap-3">
-          {["UK-5", "UK-6", "UK-7", "UK-8", "UK-9"].map((size) => (
+          {["UK-5", "UK-6", "UK-7", "UK-8", "UK-9", "UK-10"].map((size) => (
             <div
               key={size}
               onClick={() => toggleSize(size)}
