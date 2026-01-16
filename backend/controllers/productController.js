@@ -107,7 +107,7 @@ const handleRemoveProduct = async (req, res) => {
     try {
         await productModel.findByIdAndDelete(req.params.id);
         res.json({
-            sucess: true,
+            success: true,
             message: "Product removed successfully"
         })
     } catch (error) {
