@@ -24,9 +24,15 @@ const ListProducts = () => {
     try {
       console.log("Product ID:", productId);
 
+      const token = localStorage.getItem("adminToken");
+
       const response = await axios.delete(
         `${backendUrl}/products/remove/${productId}`,
-        { withCredentials: true }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       if (response.data.success) {
         toast.success("Product removed successfully");
