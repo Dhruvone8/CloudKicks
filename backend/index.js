@@ -11,6 +11,7 @@ const db = require("./config/connection");
 const adminRoute = require("./routes/adminRoute");
 const userRoute = require("./routes/userRoute");
 const productRoute = require("./routes/productRoute");
+const cartRoute = require("./routes/cartRoute");
 const expressSession = require("express-session");
 const flash = require("connect-flash")
 const connectCloudinary = require("./config/cloudinary");
@@ -55,6 +56,7 @@ app.set("view engine", "ejs")
 app.use("/admin", adminRoute)
 app.use("/users", userRoute)
 app.use("/products", productRoute)
+app.use("/cart", cartRoute)
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port} ✅`)

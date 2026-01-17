@@ -8,7 +8,8 @@ import AuthDialog from "./ui/authDialog";
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const { setShowSearch, getCartCount, token, user, logout, isLoading } = useContext(ShopContext);
+  const { setShowSearch, getCartCount, token, user, logout, isLoading } =
+    useContext(ShopContext);
 
   const handleLogout = () => {
     logout();
@@ -46,7 +47,10 @@ const Navbar = () => {
             <p>HOME</p>
             <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
           </NavLink>
-          <NavLink to="/collections" className="flex flex-col items-center gap-1">
+          <NavLink
+            to="/collections"
+            className="flex flex-col items-center gap-1"
+          >
             <p>COLLECTIONS</p>
             <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
           </NavLink>
@@ -67,7 +71,7 @@ const Navbar = () => {
             className="w-5 cursor-pointer"
             alt="Search"
           />
-          
+
           {/* Desktop Profile Dropdown */}
           <div className="group relative hidden sm:block">
             <img
@@ -80,9 +84,13 @@ const Navbar = () => {
                 {token && user ? (
                   <>
                     <p className="text-xs text-gray-700 font-medium border-b pb-2">
-                      Hello, {user.name || user.email?.split('@')[0] || 'User'}
+                      Welcome,{" "}
+                      {user.name || user.email?.split("@")[0] || "User"}
                     </p>
-                    <Link to="/orders" className="cursor-pointer hover:text-black">
+                    <Link
+                      to="/orders"
+                      className="cursor-pointer hover:text-black"
+                    >
                       My Orders
                     </Link>
                     <hr className="border-gray-300" />
@@ -185,7 +193,7 @@ const Navbar = () => {
             {token && user ? (
               <>
                 <div className="py-2 pl-6 border text-gray-700 font-medium">
-                  Hello, {user.name || user.email?.split('@')[0] || 'User'}
+                  Hello, {user.name || user.email?.split("@")[0] || "User"}
                 </div>
                 <NavLink
                   onClick={() => setVisible(false)}
