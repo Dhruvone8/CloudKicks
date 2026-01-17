@@ -46,14 +46,14 @@ const handleAddToCart = async (req, res) => {
 
         // Check if item already exists in cart
         const existingItemIndex = user.cartData.findIndex(
-            item => item.product.toString() === productId && 
-                   (size ? item.size === size : !item.size)
+            item => item.product.toString() === productId &&
+                (size ? item.size === size : !item.size)
         );
 
         if (existingItemIndex > -1) {
             // Update quantity if item exists
             const newQuantity = user.cartData[existingItemIndex].quantity + quantity;
-            
+
             // Check stock again for new quantity
             if (size) {
                 const sizeOption = product.sizes.find(s => s.size === size);
@@ -64,7 +64,7 @@ const handleAddToCart = async (req, res) => {
                     });
                 }
             }
-            
+
             user.cartData[existingItemIndex].quantity = newQuantity;
         } else {
             // Add new item to cart
@@ -183,8 +183,8 @@ const handleUpdateCartItem = async (req, res) => {
 
         // Find the item in cart
         const itemIndex = user.cartData.findIndex(
-            item => item.product.toString() === productId && 
-                   (size ? item.size === size : !item.size)
+            item => item.product.toString() === productId &&
+                (size ? item.size === size : !item.size)
         );
 
         if (itemIndex === -1) {
@@ -241,8 +241,8 @@ const handleRemoveFromCart = async (req, res) => {
 
         // Find and remove the item
         const itemIndex = user.cartData.findIndex(
-            item => item.product.toString() === productId && 
-                   (size ? item.size === size : !item.size)
+            item => item.product.toString() === productId &&
+                (size ? item.size === size : !item.size)
         );
 
         if (itemIndex === -1) {
@@ -276,37 +276,13 @@ const handleRemoveFromCart = async (req, res) => {
     }
 };
 
-// Clear entire cart
-const handleClearCart = async (req, res) => {
-    try {
-        const userId = req.user._id;
-
-        const user = await userModel.findById(userId);
-        user.cartData = [];
-        await user.save();
-
-        return res.status(200).json({
-            success: true,
-            message: "Cart cleared successfully",
-            cartData: []
-        });
-
-    } catch (error) {
-        console.error("Error clearing cart:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Failed to clear cart"
-        });
-    }
-};
-
 // Get cart count
 const handleGetCartCount = async (req, res) => {
     try {
         const userId = req.user._id;
 
         const user = await userModel.findById(userId);
-        
+
         const totalItems = user.cartData.reduce((total, item) => {
             return total + item.quantity;
         }, 0);
@@ -331,6 +307,5 @@ module.exports = {
     handleGetCart,
     handleUpdateCartItem,
     handleRemoveFromCart,
-    handleClearCart,
     handleGetCartCount
 };

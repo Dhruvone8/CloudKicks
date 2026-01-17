@@ -11,7 +11,6 @@ const ShopContextProvider = (props) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
-  const [cartItems, setcartItems] = useState({});
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [token, setToken] = useState("");
@@ -22,19 +21,24 @@ const ShopContextProvider = (props) => {
   const verifyToken = async (authToken) => {
     try {
       // Decode the JWT token to get user info
-      const base64Url = authToken.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-      
+      const base64Url = authToken.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map(function (c) {
+            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+          })
+          .join(""),
+      );
+
       const decodedToken = JSON.parse(jsonPayload);
-      
+
       // Check if token is expired
       if (decodedToken.exp && decodedToken.exp * 1000 < Date.now()) {
         throw new Error("Token expired");
       }
-      
+
       return decodedToken;
     } catch (error) {
       console.error("Token verification failed:", error);
@@ -54,36 +58,36 @@ const ShopContextProvider = (props) => {
         },
         {
           withCredentials: true,
-        }
+        },
       );
 
       if (response.data.success) {
         toast.success(response.data.message || "Registration successful!");
-        
+
         // Auto-login after registration
         const loginResponse = await axios.post(
           `${backendUrl}/users/login`,
           { email, password },
-          { withCredentials: true }
+          { withCredentials: true },
         );
-        
+
         if (loginResponse.data.success && loginResponse.data.token) {
           const userToken = loginResponse.data.token;
           localStorage.setItem("token", userToken);
           setToken(userToken);
-          
+
           // Verify and set user data
           const userData = await verifyToken(userToken);
           if (userData) {
-            setUser({ 
-              name, 
-              email: userData.email, 
+            setUser({
+              name,
+              email: userData.email,
               role: userData.role,
-              id: userData.id 
+              id: userData.id,
             });
           }
         }
-        
+
         return { success: true };
       } else {
         toast.error(response.data.message || "Registration failed");
@@ -92,8 +96,8 @@ const ShopContextProvider = (props) => {
     } catch (error) {
       console.error("Registration error:", error);
       const errorMessage =
-        error.response?.data?.message || 
-        error.message || 
+        error.response?.data?.message ||
+        error.message ||
         "Registration failed. Please try again.";
       toast.error(errorMessage);
       return { success: false, message: errorMessage };
@@ -111,36 +115,36 @@ const ShopContextProvider = (props) => {
         },
         {
           withCredentials: true,
-        }
+        },
       );
 
       if (response.data.success) {
         const userToken = response.data.token;
         const userRole = response.data.role;
         const userName = response.data.user?.name;
-        
+
         // Check if user is admin - admins should not be allowed to login to frontend
         if (userRole === "admin") {
           toast.error("User doesn't exist with this email/password");
           return { success: false, message: "User not found" };
         }
-        
+
         // Store token
         localStorage.setItem("token", userToken);
         setToken(userToken);
-        
+
         // Verify and set user data
         const userData = await verifyToken(userToken);
         if (userData) {
-          setUser({ 
+          setUser({
             name: userName,
-            email: userData.email, 
+            email: userData.email,
             role: userData.role,
-            id: userData.id 
+            id: userData.id,
           });
           toast.success(response.data.message || "Login successful!");
         }
-        
+
         return { success: true };
       } else {
         toast.error(response.data.message || "Login failed");
@@ -163,7 +167,6 @@ const ShopContextProvider = (props) => {
       localStorage.removeItem("token");
       setToken("");
       setUser(null);
-      setcartItems({});
       toast.success("Logged out successfully");
       navigate("/");
     } catch (error) {
@@ -172,7 +175,6 @@ const ShopContextProvider = (props) => {
       localStorage.removeItem("token");
       setToken("");
       setUser(null);
-      setcartItems({});
       toast.error("Logout failed, but local session cleared");
     }
   };
@@ -182,10 +184,10 @@ const ShopContextProvider = (props) => {
     const initAuth = async () => {
       setIsLoading(true);
       const savedToken = localStorage.getItem("token");
-      
+
       if (savedToken) {
         const userData = await verifyToken(savedToken);
-        
+
         if (userData) {
           // Check if token is still valid and user is not admin
           if (userData.role === "admin") {
@@ -198,7 +200,7 @@ const ShopContextProvider = (props) => {
             setUser({
               email: userData.email,
               role: userData.role,
-              id: userData.id
+              id: userData.id,
             });
           }
         } else {
@@ -208,78 +210,81 @@ const ShopContextProvider = (props) => {
           setUser(null);
         }
       }
-      
+
       setIsLoading(false);
     };
 
     initAuth();
   }, []);
 
-  const addToCart = (itemId, size) => {
-    return new Promise((resolve, reject) => {
-      if (!size) {
-        reject("Please select a size");
-        return;
-      }
+  // Add to cart - Backend integrated
+  const addToCart = async (productId, size) => {
+    if (!token) {
+      toast.error("Please login to add items to cart");
+      return { success: false, message: "Not authenticated" };
+    }
 
-      let cartData = structuredClone(cartItems);
+    if (!size) {
+      toast.error("Please select a size");
+      return { success: false, message: "Size required" };
+    }
 
-      if (cartData[itemId]) {
-        if (cartData[itemId][size]) {
-          cartData[itemId][size] += 1;
-        } else {
-          cartData[itemId][size] = 1;
-        }
+    try {
+      const response = await fetch(`${backendUrl}/cart/add`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId,
+          size,
+          quantity: 1,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success("Added to cart");
+        return { success: true };
       } else {
-        cartData[itemId] = {};
-        cartData[itemId][size] = 1;
+        toast.error(data.message || "Failed to add to cart");
+        return { success: false, message: data.message };
       }
-
-      setcartItems(cartData);
-
-      setTimeout(() => {
-        resolve("Added to cart");
-      }, 500);
-    });
-  };
-
-  const getCartCount = () => {
-    let totalCount = 0;
-    for (const items in cartItems) {
-      for (const item in cartItems[items]) {
-        try {
-          if (cartItems[items][item] > 0) {
-            totalCount += cartItems[items][item];
-          }
-        } catch (error) {
-          console.error("Error calculating cart count:", error);
-        }
-      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      toast.error("Failed to add item to cart");
+      return { success: false, message: error.message };
     }
-    return totalCount;
   };
 
-  const updateQuantity = async (itemId, size, quantity) => {
-    let cartData = structuredClone(cartItems);
-    cartData[itemId][size] = quantity;
-    setcartItems(cartData);
-  };
+  // Get cart count from backend
+  const getCartCount = async () => {
+    if (!token) return 0;
 
-  const getCartTotal = () => {
-    let totalAmount = 0;
-    for (const items in cartItems) {
-      let itemInfo = products.find((product) => product._id === items);
-      if (itemInfo) {
-        for (const size in cartItems[items]) {
-          if (cartItems[items][size] > 0) {
-            totalAmount += itemInfo.price * cartItems[items][size];
-          }
-        }
+    try {
+      const response = await fetch(`${backendUrl}/cart/count`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        return data.count || 0;
       }
+      return 0;
+    } catch (error) {
+      console.error("Error getting cart count:", error);
+      return 0;
     }
-    return totalAmount;
   };
 
+  // Fetch products from backend
   const fetchProducts = async () => {
     try {
       const response = await axios.get(`${backendUrl}/products/list`);
@@ -310,12 +315,8 @@ const ShopContextProvider = (props) => {
     setSearch,
     showSearch,
     setShowSearch,
-    cartItems,
-    setcartItems,
     addToCart,
     getCartCount,
-    updateQuantity,
-    getCartTotal,
     navigate,
     backendUrl,
     token,

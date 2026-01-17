@@ -6,7 +6,6 @@ const {
     handleGetCart,
     handleUpdateCartItem,
     handleRemoveFromCart,
-    handleClearCart,
     handleGetCartCount
 } = require("../controllers/cartController");
 
@@ -24,8 +23,5 @@ router.patch("/update", isLoggedIn, handleUpdateCartItem);
 
 // Remove item from cart
 router.delete("/remove", isLoggedIn, handleRemoveFromCart);
-
-// Clear entire cart
-router.delete("/clear", isLoggedIn, handleClearCart);
 
 module.exports = router;

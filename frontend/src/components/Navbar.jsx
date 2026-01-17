@@ -1,15 +1,37 @@
-import React from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { assets } from "../assets/frontend_assets/assets";
 import { Link, NavLink } from "react-router-dom";
-import { useState, useContext } from "react";
 import { ShopContext } from "../context/ShopContext";
 import AuthDialog from "./ui/authDialog";
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   const { setShowSearch, getCartCount, token, user, logout, isLoading } =
     useContext(ShopContext);
+
+  useEffect(() => {
+    const fetchCartCount = async () => {
+      if (token) {
+        const count = await getCartCount();
+        setCartCount(count);
+      } else {
+        setCartCount(0);
+      }
+    };
+
+    fetchCartCount();
+
+    // Poll cart count every 30 seconds if user is logged in
+    const interval = setInterval(() => {
+      if (token) {
+        fetchCartCount();
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [token, getCartCount]);
 
   const handleLogout = () => {
     logout();
@@ -134,9 +156,11 @@ const Navbar = () => {
               className="w-5 min-w-5 cursor-pointer"
               alt="Cart"
             />
-            <p className="absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]">
-              {getCartCount() || 0}
-            </p>
+            {cartCount > 0 && (
+              <p className="absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]">
+                {cartCount}
+              </p>
+            )}
           </Link>
           <img
             onClick={() => setVisible(true)}

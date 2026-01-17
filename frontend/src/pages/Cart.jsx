@@ -7,24 +7,142 @@ import { toast } from "sonner";
 import CartTotal from "../components/CartTotal";
 
 const Cart = () => {
-  const { products, currency, cartItems, updateQuantity, navigate } = useContext(ShopContext);
+  const { currency, navigate, backendUrl, token } = useContext(ShopContext);
   const [cartData, setCartData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState({});
+
+  // Fetch cart data from backend
+  const fetchCartData = async () => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${backendUrl}/cart`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setCartData(data.cartData);
+      } else {
+        toast.error("Failed to load cart");
+      }
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+      toast.error("Failed to load cart items");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update item quantity
+  const updateQuantity = async (productId, size, newQuantity) => {
+    const updateKey = `${productId}-${size}`;
+    setUpdating((prev) => ({ ...prev, [updateKey]: true }));
+
+    try {
+      const response = await fetch(`${backendUrl}/cart/update`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId,
+          size,
+          quantity: newQuantity,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setCartData(data.cartData);
+        if (newQuantity === 0) {
+          toast.success("Item removed from cart");
+        }
+      } else {
+        toast.error(data.message || "Failed to update cart");
+      }
+    } catch (error) {
+      console.error("Error updating cart:", error);
+      toast.error("Failed to update quantity");
+    } finally {
+      setUpdating((prev) => ({ ...prev, [updateKey]: false }));
+    }
+  };
+
+  // Calculate cart total for CartTotal component
+  const getCartTotal = () => {
+    return cartData.reduce((total, item) => {
+      if (item.product) {
+        return total + item.product.price * item.quantity;
+      }
+      return total;
+    }, 0);
+  };
 
   useEffect(() => {
-    const tempData = [];
-    for (const items in cartItems) {
-      for (const item in cartItems[items]) {
-        if (cartItems[items][item] > 0) {
-          tempData.push({
-            _id: items,
-            size: item,
-            quantity: cartItems[items][item],
-          });
-        }
-      }
-    }
-    setCartData(tempData);
-  }, [cartItems]);
+    fetchCartData();
+  }, [token]);
+
+  // Show login prompt if not authenticated
+  if (!token) {
+    return (
+      <div className="border-t pt-14 min-h-[60vh] flex flex-col items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-4">Your cart is empty</h2>
+          <p className="text-gray-600 mb-6">Please login to view your cart</p>
+          <button
+            onClick={() => navigate("/login")}
+            className="bg-black text-white px-8 py-3 rounded-md hover:bg-gray-800 transition-colors"
+          >
+            Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="border-t pt-14 min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading cart...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty cart message
+  if (cartData.length === 0) {
+    return (
+      <div className="border-t pt-14 min-h-[60vh] flex flex-col items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-4">Your cart is empty</h2>
+          <p className="text-gray-600 mb-6">
+            Add some products to get started
+          </p>
+          <button
+            onClick={() => navigate("/collections")}
+            className="bg-black text-white px-8 py-3 rounded-md hover:bg-gray-800 transition-colors"
+          >
+            Continue Shopping
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="border-t pt-14">
@@ -34,13 +152,15 @@ const Cart = () => {
 
       <div className="flex flex-col gap-y-3">
         {cartData.map((item) => {
-          const productData = products.find(
-            (product) => product._id === item._id
-          );
+          if (!item.product) return null;
 
-          if (!productData) return null;
+          const productData = item.product;
+          const uniqueId = `${item.product._id}-${item.size || "no-size"}`;
+          const isUpdating = updating[uniqueId];
 
-          const uniqueId = `${item._id}-${item.size}`;
+          // Handle image URL - support both formats
+          const imageUrl =
+            productData.images?.[0]?.url || productData.images?.[0];
 
           return (
             <div
@@ -51,7 +171,7 @@ const Cart = () => {
             >
               <div className="col-span-2 sm:col-span-1 flex items-start gap-4">
                 <img
-                  src={productData.image[0]}
+                  src={imageUrl}
                   alt={productData.name}
                   className="w-20 sm:w-20 object-cover aspect-square rounded-sm"
                 />
@@ -64,9 +184,11 @@ const Cart = () => {
                       {currency}
                       {productData.price}
                     </p>
-                    <p className="px-2 py-1 border bg-slate-50 rounded-md text-xs text-gray-600">
-                      {item.size}
-                    </p>
+                    {item.size && (
+                      <p className="px-2 py-1 border bg-slate-50 rounded-md text-xs text-gray-600">
+                        {item.size}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -79,11 +201,16 @@ const Cart = () => {
                   inputProps={{ min: 1, max: 10 }}
                   value={item.quantity}
                   onChange={(e) =>
-                    updateQuantity(item._id, item.size, Number(e.target.value))
+                    updateQuantity(
+                      item.product._id,
+                      item.size,
+                      Number(e.target.value)
+                    )
                   }
-                  sx={{ 
+                  disabled={isUpdating}
+                  sx={{
                     width: "80px",
-                    "& .MuiInputBase-root": { backgroundColor: "white" }
+                    "& .MuiInputBase-root": { backgroundColor: "white" },
                   }}
                 />
               </div>
@@ -92,8 +219,7 @@ const Cart = () => {
                 <DeleteButton
                   id={uniqueId}
                   onConfirm={() => {
-                    updateQuantity(item._id, item.size, 0);
-                    toast.success("Item removed from cart");
+                    updateQuantity(item.product._id, item.size, 0);
                   }}
                 />
               </div>
@@ -104,10 +230,10 @@ const Cart = () => {
 
       <div className="flex justify-end my-10 sm:my-20">
         <div className="w-full sm:w-[450px]">
-          <CartTotal />
+          <CartTotal cartTotal={getCartTotal()} />
           <div className="w-full text-end">
-            <button 
-              onClick={() => navigate('/checkout')}
+            <button
+              onClick={() => navigate("/checkout")}
               className="bg-black text-white py-3 rounded-md text-md my-8 px-8
               cursor-pointer hover:scale-105 transition-all duration-300 w-full sm:w-auto shadow-md"
             >
