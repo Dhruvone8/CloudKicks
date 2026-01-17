@@ -140,7 +140,8 @@ const handleUpdateProduct = async (req, res) => {
             category,
             subCategory,
             sizes,
-            bestSeller
+            bestSeller,
+            existingImages
         } = req.body;
 
         // Update only if provided
@@ -164,6 +165,51 @@ const handleUpdateProduct = async (req, res) => {
             } else {
                 product.sizes = sizes;
             }
+        }
+
+        if (existingImages !== undefined) {
+            let parsedExistingImages;
+            if (typeof existingImages === "string") {
+                try {
+                    parsedExistingImages = JSON.parse(existingImages);
+                } catch (err) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Invalid existing images format"
+                    });
+                }
+            } else {
+                parsedExistingImages = existingImages;
+            }
+
+            // Find images to delete
+            const imagesToDelete = product.images.filter(
+                img => !parsedExistingImages.some(existImg => existImg.public_id === img.public_id)
+            );
+
+            // Delete removed images from Cloudinary
+            for (const image of imagesToDelete) {
+                try {
+                    await cloudinary.uploader.destroy(image.public_id);
+                } catch (error) {
+                    console.error("Error deleting image from Cloudinary:", error);
+                }
+            }
+
+            product.images = parsedExistingImages;
+        }
+
+        // Handle new image uploads
+        if(req.files && req.files.length > 0) {
+            const newImages = [];
+            for(const file of req.files) {
+                const result = await uploadToCloudinary(file.buffer, "productImages")
+                newImages.push({
+                    url : result.secure_url,
+                    public_id : result.public_id
+                });
+            }
+            product.images = [...product.images, ...newImages];
         }
 
         // Save updated product

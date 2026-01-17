@@ -1,19 +1,65 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { assets } from "../admin_assets/assets";
 import { SaveButton } from "@/components/ui/status-button";
-import { toast } from "sonner";
+import { toast, Toaster } from "sonner";
 import { StepOutFreeIcons } from "@hugeicons/core-free-icons/index";
 import axios from "axios";
 import { backendUrl } from "../App";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const AddProducts = ({ token }) => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const editProductId = searchParams.get("edit");
+  const isEditMode = Boolean(editProductId);
+
   const [images, setImages] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
   const [name, setName] = useState("");
   const [price, setPrice] = useState(0);
   const [category, setCategory] = useState("Men");
   const [subCategory, setSubCategory] = useState("Casual");
   const [bestSeller, setBestSeller] = useState(false);
   const [sizes, setSizes] = useState([{ size: "UK-7", stock: 0 }]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch Product Data if in edit mode
+  useEffect(() => {
+    if (isEditMode) {
+      fetchProductData();
+    }
+  }, [editProductId]);
+
+  const fetchProductData = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${backendUrl}/products/list`);
+
+      if (response.data.success) {
+        const product = response.data.products.find(
+          (p) => p._id === editProductId,
+        );
+
+        if (product) {
+          setName(product.name);
+          setPrice(product.price);
+          setCategory(product.category);
+          setSubCategory(product.subCategory);
+          setBestSeller(product.bestSeller);
+          setSizes(product.sizes || []);
+          setExistingImages(product.images || []);
+        } else {
+          toast.error("Product Not Found");
+          navigate("/list");
+        }
+      }
+    } catch (error) {
+      toast.error("Failed to fetch Product data");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Handle File Selection
   const handleImageChange = (e) => {
@@ -27,9 +73,14 @@ const AddProducts = ({ token }) => {
     setImages((prev) => [...prev, ...files]);
   };
 
-  // Delete image
+  // Delete new image
   const removeImage = (index) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Delete existing image
+  const removeExistingImage = (index) => {
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Toggle Size Selection
@@ -54,9 +105,15 @@ const AddProducts = ({ token }) => {
   const onSubmitHandler = async (e) => {
     e.preventDefault();
 
-    // Validation
-    if (images.length === 0) {
+    // Validation - only check for images if not in edit mode OR if all images were removed
+    if (!isEditMode && images.length === 0) {
       toast.error("Please upload at least one image");
+      return;
+    }
+
+    // In edit mode, check if there's at least one image (existing or new)
+    if (isEditMode && images.length === 0 && existingImages.length === 0) {
+      toast.error("Please keep or upload at least one image");
       return;
     }
 
@@ -66,35 +123,64 @@ const AddProducts = ({ token }) => {
     }
 
     try {
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("price", price.toString());
-      formData.append("category", category);
-      formData.append("subCategory", subCategory);
-      formData.append("bestSeller", bestSeller ? "true" : "false");
-      formData.append("sizes", JSON.stringify(sizes));
+      if (isEditMode) {
+        // Update product
+        const updateData = {
+          name,
+          price: price.toString(),
+          category,
+          subCategory,
+          bestSeller: bestSeller ? "true" : "false",
+          sizes: JSON.stringify(sizes),
+          existingImages: JSON.stringify(existingImages),
+        };
 
-      images.forEach((image) => {
-        formData.append("images", image);
-      });
-
-      const response = await axios.post(
-        backendUrl + "/products/add",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const response = await axios.patch(
+          `${backendUrl}/products/update/${editProductId}`,
+          updateData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        }
-      );
+        );
 
-      toast.success("Product added successfully");
+        toast.success("Product updated successfully");
+        navigate("/list");
+      } else {
+        // Add new product
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("price", price.toString());
+        formData.append("category", category);
+        formData.append("subCategory", subCategory);
+        formData.append("bestSeller", bestSeller ? "true" : "false");
+        formData.append("sizes", JSON.stringify(sizes));
 
-      // Reset form
-      setImages([]);
-      setName("");
-      setPrice(0);
-      setSizes([]);
+        images.forEach((image) => {
+          formData.append("images", image);
+        });
+
+        const response = await axios.post(
+          backendUrl + "/products/add",
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        toast.success("Product added successfully");
+
+        // Reset form
+        setImages([]);
+        setExistingImages([]);
+        setName("");
+        setPrice(0);
+        setSizes([]);
+        setBestSeller(false);
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
     }
@@ -103,8 +189,8 @@ const AddProducts = ({ token }) => {
   const updateStock = (size, stock) => {
     setSizes((prev) =>
       prev.map((s) =>
-        s.size === size ? { ...s, stock: parseInt(stock) || 0 } : s
-      )
+        s.size === size ? { ...s, stock: parseInt(stock) || 0 } : s,
+      ),
     );
   };
 
@@ -113,17 +199,55 @@ const AddProducts = ({ token }) => {
     return sizeData ? sizeData.stock : 0;
   };
 
+  if (loading) {
+    return <div className="text-center py-8">Loading product data...</div>;
+  }
+
   return (
     <form
       onSubmit={onSubmitHandler}
       className="flex flex-col w-full items-start gap-3"
     >
+      <div className="flex justify-between items-center w-full mb-4">
+        <h2 className="text-2xl font-semibold">
+          {isEditMode ? "Update Product" : "Add New Product"}
+        </h2>
+        {isEditMode && (
+          <button
+            type="button"
+            onClick={() => navigate("/list")}
+            className="text-gray-600 hover:text-gray-800 underline"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
+
       <p className="mb-2">Upload Product Image (max 4)</p>
       <div className="flex gap-2 flex-wrap">
-        {images.length === 0 && (
+        {/* Existing Images (in edit mode) */}
+        {existingImages.map((img, index) => (
+          <div key={`existing-${index}`} className="relative">
+            <img
+              src={img.url}
+              alt={`Product ${index}`}
+              className="w-24 h-24 object-cover rounded border"
+            />
+            <button
+              type="button"
+              className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center"
+              onClick={() => removeExistingImage(index)}
+            >
+              &times;
+            </button>
+          </div>
+        ))}
+
+        {/* New Images */}
+        {images.length === 0 && existingImages.length === 0 && (
           <label htmlFor="images">
             <img
-              className=" pt-2 w-30 cursor-pointer hover:scale-105 transition-smooth duration-300 ease-in-out"
+              className="pt-2 w-30 cursor-pointer hover:scale-105 transition-smooth duration-300 ease-in-out"
               src={assets.upload_area}
               alt="Upload Area"
             />
@@ -140,7 +264,7 @@ const AddProducts = ({ token }) => {
         )}
 
         {images.map((img, index) => (
-          <div key={index} className="relative">
+          <div key={`new-${index}`} className="relative">
             <img
               src={URL.createObjectURL(img)}
               alt={`Product ${index}`}
@@ -155,7 +279,8 @@ const AddProducts = ({ token }) => {
             </button>
           </div>
         ))}
-        {images.length < 4 && (
+
+        {images.length + existingImages.length < 4 && (
           <label htmlFor="images">
             <img
               className="pt-2 w-30 cursor-pointer hover:scale-105 transition:smooth duration-300 ease-in-out"
@@ -174,16 +299,15 @@ const AddProducts = ({ token }) => {
           </label>
         )}
       </div>
+
       <div className="w-1/4">
         <p className="mb-2">Product Name</p>
         <input
-          className="w-full max-w-[500px] px-3 py-2"
+          className="w-full max-w-[500px] px-3 py-2 border rounded"
           type="text"
           placeholder="Type Here"
           required
-          onChange={(e) => {
-            setName(e.target.value);
-          }}
+          onChange={(e) => setName(e.target.value)}
           value={name}
         />
       </div>
@@ -192,8 +316,9 @@ const AddProducts = ({ token }) => {
         <div>
           <p className="mb-2">Product Category</p>
           <select
+            value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full px-3 py-2"
+            className="w-full px-3 py-2 border rounded"
           >
             <option value="Men">Men</option>
             <option value="Women">Women</option>
@@ -202,8 +327,9 @@ const AddProducts = ({ token }) => {
         <div>
           <p className="mb-2">Sub-Category</p>
           <select
+            value={subCategory}
             onChange={(e) => setSubCategory(e.target.value)}
-            className="w-full px-3 py-2"
+            className="w-full px-3 py-2 border rounded"
           >
             <option value="Casual">Casual</option>
             <option value="Sports">Sports</option>
@@ -216,7 +342,7 @@ const AddProducts = ({ token }) => {
           <input
             onChange={(e) => setPrice(e.target.value)}
             value={price}
-            className="w-full px-3 py-2 sm:w-[120px]"
+            className="w-full px-3 py-2 sm:w-[120px] border rounded"
             type="Number"
             placeholder="999"
             required
@@ -226,7 +352,6 @@ const AddProducts = ({ token }) => {
 
       <div>
         <p className="mb-2">Product Sizes</p>
-
         <div className="flex gap-3">
           {["UK-5", "UK-6", "UK-7", "UK-8", "UK-9", "UK-10"].map((size) => (
             <div
@@ -268,7 +393,7 @@ const AddProducts = ({ token }) => {
 
       <div className="flex gap-2 mt-2">
         <input
-          onChange={(e) => setBestSeller((prev) => !prev)}
+          onChange={() => setBestSeller((prev) => !prev)}
           checked={bestSeller}
           type="checkbox"
           id="bestSeller"
@@ -282,7 +407,7 @@ const AddProducts = ({ token }) => {
         className="bg-black text-white py-2 rounded-md text-md my-6 px-6
               cursor-pointer hover:scale-105 transition-all duration-300 w-full sm:w-auto shadow-md"
       >
-        Add Product
+        {isEditMode ? "Update Product" : "Add Product"}
       </button>
     </form>
   );

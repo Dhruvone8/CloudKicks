@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { backendUrl, currency } from "../App";
+import { useNavigate } from "react-router-dom";
 
 const ListProducts = () => {
   const [list, setList] = useState([]);
+  const navigate = useNavigate();
 
   const fetchList = async () => {
     try {
@@ -32,7 +34,7 @@ const ListProducts = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       if (response.data.success) {
         toast.success("Product removed successfully");
@@ -44,6 +46,10 @@ const ListProducts = () => {
       toast.error("Something went wrong");
       console.error("DELETE ERROR:", error);
     }
+  };
+
+  const updateProduct = (productId) => {
+    navigate(`/add?edit=${productId}`);
   };
 
   const getTotalStock = (sizes) => {
@@ -117,10 +123,18 @@ const ListProducts = () => {
               </div>
 
               {/* Action */}
-              <div className="text-right md:text-center">
+              <div className="text-right md:text-center flex justify-end md:justify-center gap-3">
+                <button
+                  onClick={() => updateProduct(item._id)}
+                  className="text-blue-600 text-lg font-bold hover:scale-110 transition cursor-pointer"
+                  title="Edit Product"
+                >
+                  ✎
+                </button>
                 <button
                   onClick={() => removeProduct(item._id)}
                   className="text-red-500 text-xl font-bold hover:scale-110 transition cursor-pointer"
+                  title="Delete Product"
                 >
                   ✕
                 </button>
