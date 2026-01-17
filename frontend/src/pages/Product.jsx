@@ -142,12 +142,12 @@ const Product = () => {
           </p>
         </div>
       </div>
-
       {/* Related Products */}
       <div className="mt-12">
         <RelatedProducts
           category={productData.category}
           subcategory={productData.subCategory}
+          currentProductId={productData._id}
         />
       </div>
     </div>
