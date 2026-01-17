@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {
@@ -25,29 +25,36 @@ const AuthDialog = ({ open, onOpenChange }) => {
 
   const { register, login } = useContext(ShopContext);
 
+  // Reset form when dialog opens/closes
+  useEffect(() => {
+    if (!open) {
+      setFormData({ name: "", email: "", password: "" });
+      setIsLoading(false);
+    }
+  }, [open]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
+      let result;
+      
       if (isLogin) {
-        const result = await login(formData.email, formData.password);
-        if (result.success) {
-          onOpenChange(false);
-          // Reset form
-          setFormData({ name: "", email: "", password: "" });
-        }
+        result = await login(formData.email, formData.password);
       } else {
-        const result = await register(
+        result = await register(
           formData.name,
           formData.email,
           formData.password
         );
-        if (result.success) {
-          onOpenChange(false);
-          // Reset form
-          setFormData({ name: "", email: "", password: "" });
-        }
+      }
+      
+      if (result.success) {
+        // Close dialog on success
+        onOpenChange(false);
+        // Reset form
+        setFormData({ name: "", email: "", password: "" });
       }
     } catch (error) {
       console.error("Auth error:", error);
@@ -103,6 +110,7 @@ const AuthDialog = ({ open, onOpenChange }) => {
                     onChange={handleInputChange}
                     required
                     disabled={isLoading}
+                    autoComplete="name"
                   />
                 </div>
               )}
@@ -118,6 +126,7 @@ const AuthDialog = ({ open, onOpenChange }) => {
                   onChange={handleInputChange}
                   required
                   disabled={isLoading}
+                  autoComplete="email"
                 />
               </div>
 
@@ -129,7 +138,7 @@ const AuthDialog = ({ open, onOpenChange }) => {
                       type="button"
                       className="text-sm text-primary hover:underline"
                       onClick={() => {
-                        // handle forgot password
+                        // handle forgot password - you can implement this later
                       }}
                       disabled={isLoading}
                     >
@@ -148,6 +157,7 @@ const AuthDialog = ({ open, onOpenChange }) => {
                   required
                   disabled={isLoading}
                   minLength={6}
+                  autoComplete={isLogin ? "current-password" : "new-password"}
                 />
                 {!isLogin && (
                   <p className="text-xs text-muted-foreground">

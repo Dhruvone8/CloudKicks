@@ -45,7 +45,7 @@ async function handleUserRegistration(req, res) {
         // Hash Password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create User
+        // Create User (always as 'normal' role for frontend registration)
         let user = await userModel.create({
             email,
             password: hashedPassword,
@@ -63,12 +63,16 @@ async function handleUserRegistration(req, res) {
         // Set Cookie
         res.cookie("token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production"
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
         return res.status(201).json({
             success: true,
-            message: "User registered successfully"
+            message: "User registered successfully",
+            token,
+            role: user.role
         });
     }
     catch (err) {
@@ -104,40 +108,41 @@ async function handleLogin(req, res) {
         }
 
         // Verify password
-        bcrypt.compare(password, user.password, (err, result) => {
-            if (err) {
-                return res.status(500).json({
-                    success: false,
-                    message: "Something went wrong"
-                });
-            }
-
-            if (!result) {
-                return res.status(401).json({
-                    success: false,
-                    message: "Invalid email or password"
-                });
-            }
-
-            // Password correct, generate token with role
-            let token = jwt.sign(
-                { email: user.email, id: user._id, role: user.role },
-                process.env.JWT_SECRET,
-                { expiresIn: "7d" }
-            );
-
-            res.cookie("token", token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production"
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        
+        if (!isPasswordCorrect) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid email or password"
             });
+        }
 
-            // Send response to frontend
-            return res.status(200).json({
-                success: true,
-                message: "Login successful",
-                token,
+        // Password correct, generate token with role
+        let token = jwt.sign(
+            { email: user.email, id: user._id, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: "7d" }
+        );
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
+
+        // Send response to frontend
+        return res.status(200).json({
+            success: true,
+            message: "Login successful",
+            token,
+            role: user.role,
+            user: {
+                id: user._id,
+                email: user.email,
+                name: user.name,
                 role: user.role
-            });
+            }
         });
 
     } catch (err) {
@@ -150,7 +155,12 @@ async function handleLogin(req, res) {
 }
 
 async function handleLogout(req, res) {
-    res.clearCookie("token");
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax"
+    });
+    
     return res.status(200).json({
         success: true,
         message: "Logged out successfully"

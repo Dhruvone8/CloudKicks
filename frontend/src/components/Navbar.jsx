@@ -8,11 +8,29 @@ import AuthDialog from "./ui/authDialog";
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const { setShowSearch, getCartCount, token, user, logout } = useContext(ShopContext);
+  const { setShowSearch, getCartCount, token, user, logout, isLoading } = useContext(ShopContext);
 
   const handleLogout = () => {
     logout();
+    setVisible(false);
   };
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-between py-5 font-medium">
+        <img
+          src={assets.logo}
+          className="w-19 h-12 object-contain cursor-pointer"
+          alt="CloudKicks Logo"
+          onClick={() => (window.location.href = "/")}
+        />
+        <div className="flex items-center gap-6">
+          <div className="w-8 h-8 bg-gray-200 animate-pulse rounded-full"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -59,13 +77,11 @@ const Navbar = () => {
             />
             <div className="group-hover:block hidden absolute dropdown-menu right-0 pt-4 z-50">
               <div className="flex flex-col gap-2 w-36 py-3 px-5 bg-slate-100 text-gray-500 rounded shadow-lg">
-                {token ? (
+                {token && user ? (
                   <>
-                    {user && (
-                      <p className="text-xs text-gray-700 font-medium border-b pb-2">
-                        Hello, {user.email?.split('@')[0] || 'User'}
-                      </p>
-                    )}
+                    <p className="text-xs text-gray-700 font-medium border-b pb-2">
+                      Hello, {user.name || user.email?.split('@')[0] || 'User'}
+                    </p>
                     <Link to="/orders" className="cursor-pointer hover:text-black">
                       My Orders
                     </Link>
@@ -95,8 +111,8 @@ const Navbar = () => {
             className="w-5 cursor-pointer sm:hidden"
             alt="Profile"
             onClick={() => {
-              if (token) {
-                // Show a mobile menu or navigate to profile
+              if (token && user) {
+                // Show mobile menu
                 setVisible(true);
               } else {
                 setAuthDialogOpen(true);
@@ -166,8 +182,11 @@ const Navbar = () => {
             </NavLink>
 
             {/* Mobile Auth Section */}
-            {token ? (
+            {token && user ? (
               <>
+                <div className="py-2 pl-6 border text-gray-700 font-medium">
+                  Hello, {user.name || user.email?.split('@')[0] || 'User'}
+                </div>
                 <NavLink
                   onClick={() => setVisible(false)}
                   className="py-2 pl-6 border"
@@ -176,10 +195,7 @@ const Navbar = () => {
                   MY ORDERS
                 </NavLink>
                 <button
-                  onClick={() => {
-                    handleLogout();
-                    setVisible(false);
-                  }}
+                  onClick={handleLogout}
                   className="py-2 pl-6 border text-left text-red-600 font-medium"
                 >
                   LOGOUT
