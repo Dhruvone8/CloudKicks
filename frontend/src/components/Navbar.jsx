@@ -45,21 +45,38 @@ const Navbar = () => {
             className="w-5 cursor-pointer"
             alt="Search"
           />
-          <div className="group relative">
+          
+          {/* Desktop Profile Dropdown */}
+          <div className="group relative hidden sm:block">
             <img
               src={assets.profile_icon}
               className="w-5 cursor-pointer"
               alt="Profile"
-              onClick={() => setAuthDialogOpen(true)}
             />
-            <div className="group-hover:block hidden absolute dropdown-menu right-0 pt-4">
-              <div className="flex flex-col gap-2 w-36 py-3 px-5 bg-slate-100 text-gray-500 rounded">
+            <div className="group-hover:block hidden absolute dropdown-menu right-0 pt-4 z-50">
+              <div className="flex flex-col gap-2 w-36 py-3 px-5 bg-slate-100 text-gray-500 rounded shadow-lg">
                 <p className="cursor-pointer hover:text-black">My Account</p>
                 <p className="cursor-pointer hover:text-black">Orders</p>
                 <p className="cursor-pointer hover:text-black">Logout</p>
+                <hr className="border-gray-300" />
+                <button
+                  onClick={() => setAuthDialogOpen(true)}
+                  className="text-left cursor-pointer hover:text-black font-medium"
+                >
+                  Login/Register
+                </button>
               </div>
             </div>
           </div>
+
+          {/* Mobile Profile Icon - Opens Dialog */}
+          <img
+            src={assets.profile_icon}
+            className="w-5 cursor-pointer sm:hidden"
+            alt="Profile"
+            onClick={() => setAuthDialogOpen(true)}
+          />
+
           <Link to="/cart" className="relative">
             <img
               src={assets.cart_icon}
@@ -80,7 +97,7 @@ const Navbar = () => {
 
         {/* Sidebar Menu for small screens*/}
         <div
-          className={`absolute top-0 right-0 bottom-0 overflow-hidden bg-white transition-all ${
+          className={`absolute top-0 right-0 bottom-0 overflow-hidden bg-white transition-all z-50 ${
             visible ? "w-full" : "w-0"
           }`}
         >
