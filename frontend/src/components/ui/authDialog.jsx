@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import React, { useState, useContext } from "react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {
   Card,
   CardContent,
@@ -11,25 +12,47 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { ShopContext } from "@/context/ShopContext";
 
 const AuthDialog = ({ open, onOpenChange }) => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const { register, login } = useContext(ShopContext);
 
-    if (isLogin) {
-      console.log("Login:", {
-        email: formData.email,
-        password: formData.password,
-      });
-    } else {
-      console.log("Register:", formData);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      if (isLogin) {
+        const result = await login(formData.email, formData.password);
+        if (result.success) {
+          onOpenChange(false);
+          // Reset form
+          setFormData({ name: "", email: "", password: "" });
+        }
+      } else {
+        const result = await register(
+          formData.name,
+          formData.email,
+          formData.password
+        );
+        if (result.success) {
+          onOpenChange(false);
+          // Reset form
+          setFormData({ name: "", email: "", password: "" });
+        }
+      }
+    } catch (error) {
+      console.error("Auth error:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -40,9 +63,20 @@ const AuthDialog = ({ open, onOpenChange }) => {
     });
   };
 
+  const toggleAuthMode = () => {
+    setIsLogin(!isLogin);
+    // Clear form when switching modes
+    setFormData({ name: "", email: "", password: "" });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] p-0">
+        <VisuallyHidden>
+          <DialogTitle>
+            {isLogin ? "Login to your account" : "Create an account"}
+          </DialogTitle>
+        </VisuallyHidden>
         <Card className="border-0 shadow-none">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">
@@ -68,6 +102,7 @@ const AuthDialog = ({ open, onOpenChange }) => {
                     value={formData.name}
                     onChange={handleInputChange}
                     required
+                    disabled={isLoading}
                   />
                 </div>
               )}
@@ -82,6 +117,7 @@ const AuthDialog = ({ open, onOpenChange }) => {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
+                  disabled={isLoading}
                 />
               </div>
 
@@ -95,6 +131,7 @@ const AuthDialog = ({ open, onOpenChange }) => {
                       onClick={() => {
                         // handle forgot password
                       }}
+                      disabled={isLoading}
                     >
                       Forgot password?
                     </button>
@@ -109,11 +146,24 @@ const AuthDialog = ({ open, onOpenChange }) => {
                   value={formData.password}
                   onChange={handleInputChange}
                   required
+                  disabled={isLoading}
+                  minLength={6}
                 />
+                {!isLogin && (
+                  <p className="text-xs text-muted-foreground">
+                    Password must be at least 6 characters
+                  </p>
+                )}
               </div>
 
-              <Button type="submit" className="w-full">
-                {isLogin ? "Login" : "Sign Up"}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading
+                  ? isLogin
+                    ? "Logging in..."
+                    : "Signing up..."
+                  : isLogin
+                  ? "Login"
+                  : "Sign Up"}
               </Button>
             </form>
           </CardContent>
@@ -122,11 +172,12 @@ const AuthDialog = ({ open, onOpenChange }) => {
             <p className="text-sm text-muted-foreground">
               {isLogin ? (
                 <>
-                  Don’t have an account?{" "}
+                  Don't have an account?{" "}
                   <button
                     type="button"
-                    onClick={() => setIsLogin(false)}
+                    onClick={toggleAuthMode}
                     className="text-primary font-medium hover:underline"
+                    disabled={isLoading}
                   >
                     Sign Up
                   </button>
@@ -136,8 +187,9 @@ const AuthDialog = ({ open, onOpenChange }) => {
                   Already have an account?{" "}
                   <button
                     type="button"
-                    onClick={() => setIsLogin(true)}
+                    onClick={toggleAuthMode}
                     className="text-primary font-medium hover:underline"
+                    disabled={isLoading}
                   >
                     Login
                   </button>

@@ -14,6 +14,106 @@ const ShopContextProvider = (props) => {
   const [cartItems, setcartItems] = useState({});
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const [token, setToken] = useState("");
+  const [user, setUser] = useState(null);
+
+  // Register function
+  const register = async (name, email, password) => {
+    try {
+      const response = await axios.post(
+        `${backendUrl}/users/register`,
+        {
+          name,
+          email,
+          password,
+        },
+        {
+          withCredentials: true, // Important for cookies
+        }
+      );
+
+      if (response.data.success) {
+        toast.success(response.data.message || "Registration successful!");
+        // Store the user info
+        setUser({ name, email });
+        navigate("/");
+        return { success: true };
+      } else {
+        toast.error(response.data.message || "Registration failed");
+        return { success: false, message: response.data.message };
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      const errorMessage =
+        error.response?.data?.message || 
+        error.message || 
+        "Registration failed. Please try again.";
+      toast.error(errorMessage);
+      return { success: false, message: errorMessage };
+    }
+  };
+
+  // Login function
+  const login = async (email, password) => {
+    try {
+      const response = await axios.post(
+        `${backendUrl}/users/login`,
+        {
+          email,
+          password,
+        },
+        {
+          withCredentials: true, // Important for cookies
+        }
+      );
+
+      if (response.data.success) {
+        toast.success(response.data.message);
+        // Store token in localStorage
+        if (response.data.token) {
+          localStorage.setItem("token", response.data.token);
+          setToken(response.data.token);
+        }
+        // You might want to fetch user data here
+        setUser({ email, role: response.data.role });
+        navigate("/");
+        return { success: true };
+      } else {
+        toast.error(response.data.message);
+        return { success: false, message: response.data.message };
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Login failed";
+      toast.error(errorMessage);
+      return { success: false, message: errorMessage };
+    }
+  };
+
+  // Logout function
+  const logout = async () => {
+    try {
+      await axios.get(`${backendUrl}/users/logout`, {
+        withCredentials: true,
+      });
+      localStorage.removeItem("token");
+      setToken("");
+      setUser(null);
+      setcartItems({});
+      toast.success("Logged out successfully");
+      navigate("/");
+    } catch (error) {
+      toast.error("Logout failed");
+    }
+  };
+
+  // Check if user is logged in on mount
+  useEffect(() => {
+    const savedToken = localStorage.getItem("token");
+    if (savedToken) {
+      setToken(savedToken);
+      // Optionally verify token with backend
+    }
+  }, []);
 
   const addToCart = (itemId, size) => {
     return new Promise((resolve, reject) => {
@@ -84,7 +184,6 @@ const ShopContextProvider = (props) => {
     try {
       const response = await axios.get(`${backendUrl}/products/list`);
       if (response.data.success) {
-        // Transform images array to match frontend expectations
         const transformedProducts = response.data.products.map((product) => ({
           ...product,
           image: product.images.map((img) => img.url),
@@ -119,6 +218,13 @@ const ShopContextProvider = (props) => {
     getCartTotal,
     navigate,
     backendUrl,
+    token,
+    setToken,
+    user,
+    setUser,
+    register,
+    login,
+    logout,
   };
 
   return (
