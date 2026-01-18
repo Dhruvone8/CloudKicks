@@ -1,13 +1,116 @@
-
+const orderModel = require("../models/orderModel");
+const userModel = require("../models/userModel");
+const productModel = require("../models/productModel");
 
 // Placing Orders using COD 
 const handlePlaceOrder = async (req, res) => {
+    try {
+        const { items, amount, address } = req.body;
+        const userId = req.user._id;
 
+        // Input Validation
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Order Items are required"
+            });
+        }
+
+        if (!amount || amount <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Valid Amount is required"
+            });
+        }
+
+        if (!address || !address.street || !address.city || !address.state || !address.country || !address.zipcode) {
+            return res.status(400).json({
+                success: false,
+                message: "Complete Address is required"
+            });
+        }
+
+        // Validate Stock
+        const orderItems = [];
+        for (const item of items) {
+            const product = await productModel.findById(item.product);
+
+            if (!product) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Product not found"
+                });
+            }
+
+            // Check if size exists and has enough stock
+            const sizeOption = product.sizes.find(s => s.size === item.size);
+            if (!sizeOption) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Size ${item.size} not available for ${product.name}`
+                });
+            }
+
+            if (sizeOption.stock < item.quantity) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Insufficient stock for ${product.name} in size ${item.size}`
+                });
+            }
+
+            orderItems.push({
+                product: item.product,
+                size: item.size,
+                quantity: item.quantity,
+                price: product.price
+            });
+        }
+
+        const order = await orderModel.create({
+            userId,
+            items: orderItems,
+            amount,
+            address,
+            paymentMethod: "COD",
+            isPaid: false,
+            status: "Order Placed"
+        });
+
+        // Update Product Stock
+        for (const item of orderItems) {
+            const product = await productModel.findById(item.product);
+            const sizeIndex = product.sizes.findIndex(s => s.size === item.size);
+            product.sizes[sizeIndex].stock -= item.quantity;
+            await product.save();
+        }
+
+        // Clear user Cart
+        const user = await userModel.findById(userId);
+        user.cart = [];
+        await user.save();
+
+        res.status(201).json({
+            success: true,
+            message: "Order placed successfully",
+            order
+        });
+
+    } catch (error) {
+        console.error("Error placing order:", error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
 }
 
 // Placing orders using Stripe Method
 const handleOrderStripe = async (req, res) => {
-
+    try {
+        
+    } catch (error) {
+        
+    }
 }
 
 // Placing orders using Razorpay Method
