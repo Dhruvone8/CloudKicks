@@ -83,84 +83,87 @@ const Checkout = () => {
     }));
   };
 
-  const onSubmitHandler = async (e) => {
-    e.preventDefault();
-    
-    // Prevent double submission
-    if (isProcessing) {
-      return;
-    }
+const onSubmitHandler = async (e) => {
+  e.preventDefault();
+  
+  // Prevent double submission
+  if (isProcessing) {
+    return;
+  }
 
-    // Check if user is logged in
-    if (!token) {
-      toast.error("Please login to place an order");
-      navigate("/");
-      return;
-    }
+  // Check if user is logged in
+  if (!token) {
+    toast.error("Please login to place an order");
+    navigate("/");
+    return;
+  }
 
-    // Check if cart is empty
-    if (!cartData || cartData.length === 0) {
-      toast.error("Your cart is empty");
-      navigate("/cart");
-      return;
-    }
+  // Check if cart is empty
+  if (!cartData || cartData.length === 0) {
+    toast.error("Your cart is empty");
+    navigate("/cart");
+    return;
+  }
 
-    setIsProcessing(true);
+  setIsProcessing(true);
 
-    try {
-      const orderItems = cartData.map(item => ({
-        product: item.product._id,
-        size: item.size,
-        quantity: item.quantity
-      }));
+  try {
+    const orderItems = cartData.map(item => ({
+      product: item.product._id,
+      size: item.size,
+      quantity: item.quantity
+    }));
 
-      const address = {
-        street: formData.street,
-        city: formData.city,
-        state: formData.state,
-        country: formData.country,
-        zipcode: formData.zipCode
-      };
+    const address = {
+      street: formData.street,
+      city: formData.city,
+      state: formData.state,
+      country: formData.country,
+      zipcode: formData.zipCode
+    };
 
-      // Calculate total amount (cart total + delivery fee)
-      const totalAmount = cartTotal + deliveryFee;
+    // Calculate total amount (cart total + delivery fee)
+    const totalAmount = cartTotal + deliveryFee;
 
-      // Prepare order data matching backend expectations
-      const orderData = {
-        items: orderItems,
-        amount: totalAmount,
-        address: address
-      };
+    const orderData = {
+      items: orderItems,
+      amount: totalAmount,
+      address: address
+    };
 
-      // Make API call to COD endpoint
-      const response = await fetch(`${backendUrl}/orders/cod`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(orderData),
-      });
+    // Make API call to COD endpoint
+    const response = await fetch(`${backendUrl}/orders/cod`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(orderData),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (data.success) {
-        toast.success(data.message || "Order placed successfully!");
-        
-        // Navigate to orders page after a short delay
-        setTimeout(() => {
-          navigate("/orders");
-        }, 1000);
-      } else {
-        toast.error(data.message || "Failed to place order");
-        setIsProcessing(false);
-      }
-    } catch (error) {
-      console.error("Order placement error:", error);
-      toast.error(error.message || "Failed to place order. Please try again.");
+    if (data.success) {
+      // Clear local cart data immediately
+      setCartData([]);
+      setCartTotal(0);
+      
+      toast.success(data.message || "Order placed successfully!");
+      
+      // Navigate to orders page after a short delay
+      setTimeout(() => {
+        navigate("/orders");
+      }, 500);
+    } else {
+      toast.error(data.message || "Failed to place order");
       setIsProcessing(false);
     }
-  };
+  } catch (error) {
+    console.error("Order placement error:", error);
+    toast.error(error.message || "Failed to place order. Please try again.");
+    setIsProcessing(false);
+  }
+};
 
   return (
     <form 

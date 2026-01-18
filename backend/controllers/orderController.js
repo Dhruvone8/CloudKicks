@@ -86,7 +86,7 @@ const handlePlaceOrder = async (req, res) => {
 
         // Clear user Cart
         const user = await userModel.findById(userId);
-        user.cart = [];
+        user.cartData = [];
         await user.save();
 
         res.status(201).json({

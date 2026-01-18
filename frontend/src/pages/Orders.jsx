@@ -125,7 +125,7 @@ const Orders = () => {
             You haven't placed any orders yet
           </p>
           <a
-            href="/collection"
+            href="/collections"
             className="inline-block mt-4 bg-black text-white px-8 py-3 rounded-md hover:scale-105 transition-all duration-300"
           >
             Start Shopping
