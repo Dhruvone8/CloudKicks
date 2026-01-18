@@ -2,7 +2,6 @@ const orderModel = require("../models/orderModel");
 const userModel = require("../models/userModel");
 const productModel = require("../models/productModel");
 
-// Placing Orders using COD 
 const handlePlaceOrder = async (req, res) => {
     try {
         const { items, amount, address } = req.body;
@@ -22,8 +21,8 @@ const handlePlaceOrder = async (req, res) => {
                 message: "Valid Amount is required"
             });
         }
-
-        if (!address || !address.street || !address.city || !address.state || !address.country || !address.zipcode) {
+        
+        if (!address || !address.street || !address.city || !address.state || !address.country || !address.zip) {
             return res.status(400).json({
                 success: false,
                 message: "Complete Address is required"

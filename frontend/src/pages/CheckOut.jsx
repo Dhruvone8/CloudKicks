@@ -1,7 +1,7 @@
 import React, { useContext, useState, useRef, useEffect } from "react";
 import Title from "../components/Title";
 import CartTotal from "../components/CartTotal";
-import {assets} from "../assets/assets"
+import { assets } from "../assets/assets";
 import { SaveButton } from "@/components/ui/status-button";
 import { ShopContext } from "@/context/ShopContext";
 import { toast } from "sonner";
@@ -19,13 +19,14 @@ const Checkout = () => {
     country: "",
     phone: "",
   });
-  
+
   const [cartData, setCartData] = useState([]);
   const [cartTotal, setCartTotal] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
-  
-  const { navigate, backendUrl, token, deliveryFee, currency } = useContext(ShopContext);
-    
+
+  const { navigate, backendUrl, token, deliveryFee, currency } =
+    useContext(ShopContext);
+
   const formRef = useRef(null);
 
   // Fetch cart data on component mount
@@ -50,15 +51,15 @@ const Checkout = () => {
 
         if (data.success) {
           setCartData(data.cartData);
-          
+
           // Calculate total
           const total = data.cartData.reduce((sum, item) => {
             if (item.product) {
-              return sum + (item.product.price * item.quantity);
+              return sum + item.product.price * item.quantity;
             }
             return sum;
           }, 0);
-          
+
           setCartTotal(total);
         } else {
           toast.error("Failed to load cart");
@@ -83,90 +84,90 @@ const Checkout = () => {
     }));
   };
 
-const onSubmitHandler = async (e) => {
-  e.preventDefault();
-  
-  // Prevent double submission
-  if (isProcessing) {
-    return;
-  }
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
 
-  // Check if user is logged in
-  if (!token) {
-    toast.error("Please login to place an order");
-    navigate("/");
-    return;
-  }
+    // Prevent double submission
+    if (isProcessing) {
+      return;
+    }
 
-  // Check if cart is empty
-  if (!cartData || cartData.length === 0) {
-    toast.error("Your cart is empty");
-    navigate("/cart");
-    return;
-  }
+    // Check if user is logged in
+    if (!token) {
+      toast.error("Please login to place an order");
+      navigate("/");
+      return;
+    }
 
-  setIsProcessing(true);
+    // Check if cart is empty
+    if (!cartData || cartData.length === 0) {
+      toast.error("Your cart is empty");
+      navigate("/cart");
+      return;
+    }
 
-  try {
-    const orderItems = cartData.map(item => ({
-      product: item.product._id,
-      size: item.size,
-      quantity: item.quantity
-    }));
+    setIsProcessing(true);
 
-    const address = {
-      street: formData.street,
-      city: formData.city,
-      state: formData.state,
-      country: formData.country,
-      zipcode: formData.zipCode
-    };
+    try {
+      const orderItems = cartData.map((item) => ({
+        product: item.product._id,
+        size: item.size,
+        quantity: item.quantity,
+      }));
 
-    // Calculate total amount (cart total + delivery fee)
-    const totalAmount = cartTotal + deliveryFee;
+      const address = {
+        street: formData.street,
+        city: formData.city,
+        state: formData.state,
+        country: formData.country,
+        zip: formData.zipCode,
+        phone: formData.phone,
+      };
 
-    const orderData = {
-      items: orderItems,
-      amount: totalAmount,
-      address: address
-    };
+      // Calculate total amount (cart total + delivery fee)
+      const totalAmount = cartTotal + deliveryFee;
 
-    // Make API call to COD endpoint
-    const response = await fetch(`${backendUrl}/orders/cod`, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(orderData),
-    });
+      const orderData = {
+        items: orderItems,
+        amount: totalAmount,
+        address: address,
+      };
 
-    const data = await response.json();
+      // Make API call to COD endpoint
+      const response = await fetch(`${backendUrl}/orders/cod`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderData),
+      });
 
-    if (data.success) {
-      // Clear local cart data immediately
-      setCartData([]);
-      setCartTotal(0);
-      
-      toast.success(data.message || "Order placed successfully!");
-      
-      // Navigate to orders page after a short delay
-      setTimeout(() => {
-        navigate("/orders");
-      }, 500);
-    } else {
-      toast.error(data.message || "Failed to place order");
+      const data = await response.json();
+
+      if (data.success) {
+        // Clear local cart data immediately
+        setCartData([]);
+        setCartTotal(0);
+
+        toast.success(data.message || "Order placed successfully!");
+
+        // Navigate to orders page after a short delay
+        setTimeout(() => {
+          navigate("/orders");
+        }, 500);
+      } else {
+        toast.error(data.message || "Failed to place order");
+        setIsProcessing(false);
+      }
+    } catch (error) {
+      console.error("Order placement error:", error);
+      toast.error(error.message || "Failed to place order. Please try again.");
       setIsProcessing(false);
     }
-  } catch (error) {
-    console.error("Order placement error:", error);
-    toast.error(error.message || "Failed to place order. Please try again.");
-    setIsProcessing(false);
-  }
-};
-
+  };
   return (
-    <form 
+    <form
       ref={formRef}
       onSubmit={onSubmitHandler}
       className="flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t"
@@ -287,7 +288,9 @@ const onSubmitHandler = async (e) => {
             <div
               onClick={() => !isProcessing && setMethod("stripe")}
               className={`flex items-center gap-3 border p-2 px-3 ${
-                isProcessing ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                isProcessing
+                  ? "opacity-50 cursor-not-allowed"
+                  : "cursor-pointer"
               }`}
             >
               <p
@@ -300,7 +303,9 @@ const onSubmitHandler = async (e) => {
             <div
               onClick={() => !isProcessing && setMethod("razorpay")}
               className={`flex items-center gap-3 border p-2 px-3 ${
-                isProcessing ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                isProcessing
+                  ? "opacity-50 cursor-not-allowed"
+                  : "cursor-pointer"
               }`}
             >
               <p
@@ -308,12 +313,18 @@ const onSubmitHandler = async (e) => {
                   method === "razorpay" ? "bg-green-400" : ""
                 }`}
               ></p>
-              <img className="h-5 mx-2" src={assets.razorpay_logo} alt="Razorpay" />
+              <img
+                className="h-5 mx-2"
+                src={assets.razorpay_logo}
+                alt="Razorpay"
+              />
             </div>
             <div
               onClick={() => !isProcessing && setMethod("cod")}
               className={`flex items-center gap-3 border p-2 px-3 ${
-                isProcessing ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                isProcessing
+                  ? "opacity-50 cursor-not-allowed"
+                  : "cursor-pointer"
               }`}
             >
               <p
@@ -326,9 +337,9 @@ const onSubmitHandler = async (e) => {
               </p>
             </div>
           </div>
-          
+
           <div className="w-full text-end mt-8">
-            <SaveButton 
+            <SaveButton
               onValidate={() => {
                 // Check if form is valid before starting animation
                 if (formRef.current && formRef.current.checkValidity()) {
@@ -345,7 +356,7 @@ const onSubmitHandler = async (e) => {
                 if (!isProcessing) {
                   formRef.current.requestSubmit();
                 }
-              }} 
+              }}
             />
           </div>
         </div>
