@@ -107,9 +107,9 @@ const handlePlaceOrder = async (req, res) => {
 // Placing orders using Stripe Method
 const handleOrderStripe = async (req, res) => {
     try {
-        
+
     } catch (error) {
-        
+
     }
 }
 
@@ -125,8 +125,28 @@ const handleGetAllOrders = async (req, res) => {
 
 // Get user orders
 const handleGetUserOrders = async (req, res) => {
+    try {
+        const userId = req.user._id;
 
-}
+        const orders = await orderModel
+            .find({ userId })
+            .populate("items.product", "name images price")
+            .sort({ createdAt: -1 });
+
+        return res.status(200).json({
+            success: true,
+            message: "User orders fetched successfully",
+            orders,
+            count: orders.length
+        });
+    } catch (error) {
+        console.error("Error fetching user orders:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch orders"
+        });
+    }
+};
 
 // Update Order Status - Only Admin can access this route
 const handleUpdateOrderStatus = async (req, res) => {

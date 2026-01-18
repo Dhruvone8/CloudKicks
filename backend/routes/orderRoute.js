@@ -6,7 +6,8 @@ const { handlePlaceOrder,
     handleOrderRazorpay,
     handleGetAllOrders,
     handleGetUserOrders,
-    handleUpdateOrderStatus } from "../controllers/orderController";
+    handleUpdateOrderStatus
+} = require("../controllers/orderController");
 
 // Admin Features
 router.get("/allOrders", isAdmin, handleGetAllOrders);

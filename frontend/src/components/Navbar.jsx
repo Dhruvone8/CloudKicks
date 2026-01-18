@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import { assets } from "../assets/frontend_assets/assets";
+import { assets } from "../assets/assets";
 import { Link, NavLink } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
 import AuthDialog from "./ui/authDialog";

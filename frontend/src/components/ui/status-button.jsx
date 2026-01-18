@@ -7,11 +7,19 @@ import { Tick02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useMemo, useState } from "react";
 
-export function SaveButton({ onComplete }) {
+export function SaveButton({ onComplete, onValidate }) {
   const [status, setStatus] = useState("idle"); // idle | loading | success
 
   const handleClick = () => {
     if (status !== "idle") return; // Prevent double clicks
+    
+    // Validate before starting animation
+    if (onValidate) {
+      const isValid = onValidate();
+      if (!isValid) {
+        return; // Stop here if validation fails
+      }
+    }
     
     setStatus("loading");
     setTimeout(() => {
