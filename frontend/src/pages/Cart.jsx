@@ -1,16 +1,30 @@
 import React, { useState, useEffect, useContext } from "react";
 import { ShopContext } from "../context/ShopContext";
+import { useSearchParams } from "react-router-dom";
 import Title from "../components/Title";
 import TextField from "@mui/material/TextField";
 import DeleteButton from "../components/ui/delete-button";
 import { toast } from "sonner";
 import CartTotal from "../components/CartTotal";
+import AuthDialog from "../components/ui/authDialog";
 
 const Cart = () => {
   const { currency, navigate, backendUrl, token } = useContext(ShopContext);
   const [cartData, setCartData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState({});
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Check if auth dialog should be open based on URL
+  const authDialogOpen = searchParams.get("auth") === "true";
+
+  const setAuthDialogOpen = (open) => {
+    if (open) {
+      setSearchParams({ auth: "true" });
+    } else {
+      setSearchParams({});
+    }
+  };
 
   // Fetch cart data from backend
   const fetchCartData = async () => {
@@ -97,18 +111,21 @@ const Cart = () => {
   // Show login prompt if not authenticated
   if (!token) {
     return (
-      <div className="border-t pt-14 min-h-[60vh] flex flex-col items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold mb-4">Your cart is empty</h2>
-          <p className="text-gray-600 mb-6">Please login to view your cart</p>
-          <button
-            onClick={() => navigate("/login")}
-            className="bg-black text-white px-8 py-3 rounded-md hover:bg-gray-800 transition-colors"
-          >
-            Login
-          </button>
+      <>
+        <div className="border-t pt-14 min-h-[60vh] flex flex-col items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold mb-4">Your cart is empty</h2>
+            <p className="text-gray-600 mb-6">Please login to view your cart</p>
+            <button
+              onClick={() => setAuthDialogOpen(true)}
+              className="bg-black text-white px-8 py-3 rounded-md hover:bg-gray-800 transition-colors"
+            >
+              Login
+            </button>
+          </div>
         </div>
-      </div>
+        <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
+      </>
     );
   }
 
@@ -158,7 +175,6 @@ const Cart = () => {
           const uniqueId = `${item.product._id}-${item.size || "no-size"}`;
           const isUpdating = updating[uniqueId];
 
-          // Handle image URL - support both formats
           const imageUrl =
             productData.images?.[0]?.url || productData.images?.[0];
 

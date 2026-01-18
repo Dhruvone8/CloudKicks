@@ -1,15 +1,27 @@
 import React, { useEffect, useState, useContext } from "react";
 import { assets } from "../assets/assets";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
 import AuthDialog from "./ui/authDialog";
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
-  const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const { setShowSearch, getCartCount, token, user, logout, isLoading } =
     useContext(ShopContext);
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Check if auth dialog should be open based on URL
+  const authDialogOpen = searchParams.get("auth") === "true";
+
+  const setAuthDialogOpen = (open) => {
+    if (open) {
+      setSearchParams({ auth: "true" });
+    } else {
+      setSearchParams({});
+    }
+  };
 
   useEffect(() => {
     const fetchCartCount = async () => {
@@ -23,7 +35,6 @@ const Navbar = () => {
 
     fetchCartCount();
 
-    // Poll cart count every 30 seconds if user is logged in
     const interval = setInterval(() => {
       if (token) {
         fetchCartCount();
@@ -38,7 +49,6 @@ const Navbar = () => {
     setVisible(false);
   };
 
-  // Show loading state while checking authentication
   if (isLoading) {
     return (
       <div className="flex items-center justify-between py-5 font-medium">
@@ -94,7 +104,6 @@ const Navbar = () => {
             alt="Search"
           />
 
-          {/* Desktop Profile Dropdown */}
           <div className="group relative hidden sm:block">
             <img
               src={assets.profile_icon}
@@ -135,14 +144,12 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Mobile Profile Icon - Opens Dialog */}
           <img
             src={assets.profile_icon}
             className="w-5 cursor-pointer sm:hidden"
             alt="Profile"
             onClick={() => {
               if (token && user) {
-                // Show mobile menu
                 setVisible(true);
               } else {
                 setAuthDialogOpen(true);
@@ -170,7 +177,6 @@ const Navbar = () => {
           />
         </div>
 
-        {/* Sidebar Menu for small screens*/}
         <div
           className={`absolute top-0 right-0 bottom-0 overflow-hidden bg-white transition-all z-50 ${
             visible ? "w-full" : "w-0"
@@ -213,7 +219,6 @@ const Navbar = () => {
               CONTACT
             </NavLink>
 
-            {/* Mobile Auth Section */}
             {token && user ? (
               <>
                 <div className="py-2 pl-6 border text-gray-700 font-medium">
@@ -248,7 +253,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Auth Dialog */}
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
     </>
   );

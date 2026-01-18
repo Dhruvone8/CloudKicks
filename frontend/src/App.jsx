@@ -1,11 +1,10 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Collections from "./pages/Collections";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Product from "./pages/Product";
-import Login from "./pages/Login";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/CheckOut";
 import Orders from "./pages/Orders";
@@ -38,7 +37,8 @@ const App = () => {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/product/:productId" element={<Product />} />
-        <Route path="/login" element={<Login />} />
+        {/* Redirect /login to home - auth dialog will handle login */}
+        <Route path="/login" element={<Navigate to="/" replace />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/orders" element={<Orders />} />

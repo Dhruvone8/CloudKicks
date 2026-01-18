@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
 import { assets } from "../assets/assets";
 import RelatedProducts from "../components/RelatedProducts";
@@ -8,15 +8,24 @@ import AuthDialog from "../components/ui/authDialog";
 
 const Product = () => {
   const { productId } = useParams();
-  const { products, currency, addToCart, token, navigate } =
-    useContext(ShopContext);
+  const { products, currency, addToCart, token } = useContext(ShopContext);
   const [productData, setProductData] = useState(null);
   const [image, setImage] = useState("");
   const [size, setSize] = useState("");
   const [addingToCart, setAddingToCart] = useState(false);
-  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // Get Product data by Id
+  // Check if auth dialog should be open based on URL
+  const authDialogOpen = searchParams.get("auth") === "true";
+
+  const setAuthDialogOpen = (open) => {
+    if (open) {
+      setSearchParams({ auth: "true" });
+    } else {
+      setSearchParams({});
+    }
+  };
+
   const fetchProductData = async () => {
     const foundItem = products.find((item) => item._id === productId);
     if (foundItem) {
@@ -48,7 +57,6 @@ const Product = () => {
     try {
       const result = await addToCart(productData._id, size);
       if (result.success) {
-        // Size is reset after successful add
         setSize("");
       }
     } catch (error) {
@@ -61,14 +69,9 @@ const Product = () => {
   return productData ? (
     <>
       <div className="border-t-2 pt-10 transition-opacity ease-in duration-500 opacity-100">
-        {/* Product Details */}
         <div className="flex gap-12 sm:gap-12 flex-col sm:flex-row">
-          {/* Product Images */}
           <div className="flex-1 flex flex-col-reverse gap-3 sm:flex-row">
-            <div
-              className="flex sm:flex-col overflow-x-auto sm:overflow-y-scroll justify-between sm:justify-normal 
-            sm:w-[18.7%] w-full"
-            >
+            <div className="flex sm:flex-col overflow-x-auto sm:overflow-y-scroll justify-between sm:justify-normal sm:w-[18.7%] w-full">
               {productData.image.map((item, index) => (
                 <img
                   onClick={() => setImage(item)}
@@ -84,7 +87,6 @@ const Product = () => {
             </div>
           </div>
 
-          {/* Product Info */}
           <div className="flex-1">
             <h1 className="text-2xl font-medium mt-2">{productData.name}</h1>
             <div className="flex items-center gap-2 mt-2">
@@ -103,7 +105,6 @@ const Product = () => {
               <p>Select Size</p>
               <div className="flex gap-2">
                 {productData.sizes.map((item, index) => {
-                  // Extract the size value - handle both string and object formats
                   const sizeValue = typeof item === "string" ? item : item.size;
                   const stockValue = typeof item === "object" ? item.stock : null;
 
@@ -129,7 +130,7 @@ const Product = () => {
                 })}
               </div>
             </div>
-            
+
             <button
               onClick={handleAddToCart}
               disabled={addingToCart}
@@ -150,7 +151,6 @@ const Product = () => {
           </div>
         </div>
 
-        {/* Description and Reviews Section */}
         <div className="mt-20">
           <div className="flex">
             <b className="border px-5 py-3 text-sm">Description</b>
@@ -169,7 +169,6 @@ const Product = () => {
           </div>
         </div>
 
-        {/* Related Products */}
         <div className="mt-12">
           <RelatedProducts
             category={productData.category}
@@ -179,7 +178,6 @@ const Product = () => {
         </div>
       </div>
 
-      {/* Auth Dialog */}
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
     </>
   ) : (

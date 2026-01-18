@@ -39,17 +39,17 @@ const AuthDialog = ({ open, onOpenChange }) => {
 
     try {
       let result;
-      
+
       if (isLogin) {
         result = await login(formData.email, formData.password);
       } else {
         result = await register(
           formData.name,
           formData.email,
-          formData.password
+          formData.password,
         );
       }
-      
+
       if (result.success) {
         // Close dialog on success
         onOpenChange(false);
@@ -72,7 +72,6 @@ const AuthDialog = ({ open, onOpenChange }) => {
 
   const toggleAuthMode = () => {
     setIsLogin(!isLogin);
-    // Clear form when switching modes
     setFormData({ name: "", email: "", password: "" });
   };
 
@@ -137,9 +136,7 @@ const AuthDialog = ({ open, onOpenChange }) => {
                     <button
                       type="button"
                       className="text-sm text-primary hover:underline"
-                      onClick={() => {
-                        // handle forgot password - you can implement this later
-                      }}
+                      onClick={() => {}}
                       disabled={isLoading}
                     >
                       Forgot password?
@@ -172,8 +169,8 @@ const AuthDialog = ({ open, onOpenChange }) => {
                     ? "Logging in..."
                     : "Signing up..."
                   : isLogin
-                  ? "Login"
-                  : "Sign Up"}
+                    ? "Login"
+                    : "Sign Up"}
               </Button>
             </form>
           </CardContent>
@@ -186,7 +183,7 @@ const AuthDialog = ({ open, onOpenChange }) => {
                   <button
                     type="button"
                     onClick={toggleAuthMode}
-                    className="text-primary font-medium hover:underline"
+                    className="text-primary font-medium cursor-pointer hover:underline"
                     disabled={isLoading}
                   >
                     Sign Up
@@ -198,7 +195,7 @@ const AuthDialog = ({ open, onOpenChange }) => {
                   <button
                     type="button"
                     onClick={toggleAuthMode}
-                    className="text-primary font-medium hover:underline"
+                    className="text-primary font-medium cursor-pointer hover:underline"
                     disabled={isLoading}
                   >
                     Login
