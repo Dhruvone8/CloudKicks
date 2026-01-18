@@ -120,7 +120,27 @@ const handleOrderRazorpay = async (req, res) => {
 
 // Get all orders for Admin Panel - Only Admin can access this route
 const handleGetAllOrders = async (req, res) => {
+    try {
+        const orders = await orderModel
+            .find({})
+            .populate("userId", "name email")
+            .populate("items.product", "name images price")
+            .sort({ createdAt: -1 });
 
+        return res.status(200).json({
+            success: true,
+            message: "All orders fetched successfully",
+            orders,
+            count: orders.length
+        });
+
+    } catch (error) {
+        console.error("Error fetching all orders:", error);
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
 }
 
 // Get user orders

@@ -36,7 +36,7 @@ const App = () => {
               <Routes>
                 <Route path="/add" element={<AddProducts token={token} />} />
                 <Route path="/list" element={<ListProducts token={token} />} />
-                <Route path="/users" element={<Orders token={token} />} />
+                <Route path="/orders" element={<Orders token={token} />} />
               </Routes>
             </div>
           </div>
