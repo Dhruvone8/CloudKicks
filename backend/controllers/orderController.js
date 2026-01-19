@@ -21,7 +21,7 @@ const handlePlaceOrder = async (req, res) => {
                 message: "Valid Amount is required"
             });
         }
-        
+
         if (!address || !address.street || !address.city || !address.state || !address.country || !address.zip) {
             return res.status(400).json({
                 success: false,
@@ -169,7 +169,52 @@ const handleGetUserOrders = async (req, res) => {
 
 // Update Order Status - Only Admin can access this route
 const handleUpdateOrderStatus = async (req, res) => {
+    try {
+        const { orderId, status } = req.body;
 
+        // Validate Input
+        if (!orderId) {
+            return res.status(400).json({
+                success: false,
+                message: "Order ID is required"
+            });
+        }
+
+        const order = await orderModel.findById(orderId);
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Order not found"
+            });
+        }
+
+        // Restore the stock if order is cancelled
+        if (status === "Cancelled" && order.status !== "Cancelled") {
+            for (const item of order.items) {
+                const product = await productModel.findById(item.product);
+                const sizeIndex = product.sizes.findIndex(s => s.size === item.size);
+                product.sizes[sizeIndex].stock += item.quantity;
+                await product.save();
+            }
+        }
+
+        order.status = status;
+        await order.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Order status updated successfully",
+            order
+        });
+
+    } catch (err) {
+        console.error("Error updating order status:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to update order status"
+        });
+    }
 }
 
 module.exports = {

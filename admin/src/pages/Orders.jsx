@@ -1,32 +1,44 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { backendUrl } from "../App";
-import { toast } from "sonner";
 import { assets } from "../admin_assets/assets";
+import { toast } from "sonner";
 
 const Orders = ({ token }) => {
   const [orders, setOrders] = useState([]);
 
   const fetchAllOrders = async () => {
-    if (!token) {
-      return null;
-    }
+    if (!token) return;
 
+    const res = await axios.get(`${backendUrl}/orders/allOrders`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (res.data.success) {
+      setOrders(res.data.orders);
+    }
+  };
+
+  const statusHandler = async (event, orderId) => {
     try {
-      const response = await axios.get(`${backendUrl}/orders/allOrders`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await axios.post(
+        `${backendUrl}/orders/status`,
+        {
+          orderId,
+          status: event.target.value,
         },
-      });
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
       if (response.data.success) {
-        console.log(response.data.orders);
-        setOrders(response.data.orders);
-      } else {
-        console.error("Failed to fetch orders:", response.data.message);
+        toast.success("Status updated successfully");
+        fetchAllOrders();
       }
-    } catch (error) {
-      toast.error("Failed to fetch orders");
-      console.error("Error fetching orders:", error);
+    } catch (err) {
+      toast.error("Something went wrong");
+      console.log(err);
     }
   };
 
@@ -35,67 +47,72 @@ const Orders = ({ token }) => {
   }, [token]);
 
   return (
-    <div className="text-black">
-      <h2 className="text-xl font-semibold mb-4">Orders</h2>
+    <div className="w-full text-black">
+      <h2 className="text-lg font-semibold mb-6">Order Page</h2>
 
-      <div className="space-y-4">
-        {orders.length > 0 ? (
-          orders.map((order) => (
-            <div
-              key={order._id}
-              className="flex gap-4 p-4 border rounded-md bg-white"
-            >
-              <img
-                src={assets.parcel_icon}
-                alt="parcel"
-                className="w-12 h-12"
-              />
+      <div className="space-y-6">
+        {orders.map((order) => (
+          <div
+            key={order._id}
+            className="border border-gray-200 p-6 flex gap-6 items-start"
+          >
+            {/* ICON */}
+            <img
+              src={assets.parcel_icon}
+              alt="parcel"
+              className="w-10 h-10 mt-1"
+            />
 
-              <div className="flex-1">
-                <div className="mb-2">
-                  <p className="font-semibold">
-                    Customer: {order.userId?.name || "N/A"}
+            {/* ITEMS + ADDRESS */}
+            <div className="flex-1 space-y-2 text-sm">
+              {/* ITEMS */}
+              <div className="space-y-1">
+                {order.items.map((item, index) => (
+                  <p key={index}>
+                    {item.product?.name} × {item.quantity} {item.size}
                   </p>
-                </div>
+                ))}
+              </div>
 
-                <div className="mb-2">
-                  <p className="font-medium">Items:</p>
-                  {order.items.map((item, index) => (
-                    <p key={index} className="text-sm">
-                      {item.product?.name || "Product"} × {item.quantity} (
-                      {item.size})
-                    </p>
-                  ))}
-                </div>
-
-                <div className="mb-2">
-                  <p className="font-medium">Address:</p>
-                  <p className="text-sm">
-                    {order.address?.street}, {order.address?.city}
-                  </p>
-                  <p className="text-sm">
-                    {order.address?.country} - {order.address?.zip}
-                  </p>
-                </div>
-
-                <div className="text-sm">
-                  <p>
-                    <span className="font-medium">Amount:</span> ₹{order.amount}
-                  </p>
-                  <p>
-                    <span className="font-medium">Status:</span> {order.status}
-                  </p>
-                  <p>
-                    <span className="font-medium">Payment:</span>{" "}
-                    {order.paymentMethod} {order.isPaid ? "✓" : "✗"}
-                  </p>
-                </div>
+              {/* SHOP / ADDRESS */}
+              <div className="pt-2">
+                <p className="font-medium">Great Stack</p>
+                <p>Main Street,</p>
+                <p>
+                  {order.address?.city}, {order.address?.state},{" "}
+                  {order.address?.country}, {order.address?.zip}
+                </p>
+                <p>{order.address?.phone}</p>
               </div>
             </div>
-          ))
-        ) : (
-          <p className="text-center py-4">No orders found</p>
-        )}
+
+            {/* ORDER META */}
+            <div className="text-sm space-y-1 min-w-[160px]">
+              <p>Items : {order.items.length}</p>
+              <p>Method : {order.paymentMethod}</p>
+              <p>Payment : {order.isPaid ? "Paid" : "Pending"}</p>
+              <p>Date : {new Date(order.createdAt).toLocaleDateString()}</p>
+            </div>
+
+            {/* PRICE + STATUS */}
+            <div className="flex flex-col items-end gap-3 min-w-[120px]">
+              <p className="font-semibold">${order.amount}</p>
+
+              <select
+                onChange={(e) => statusHandler(e, order._id)}
+                className="border border-gray-300 px-3 py-1 text-sm"
+                value={order.status}
+              >
+                <option>Order Placed</option>
+                <option>Item Packed</option>
+                <option>Out for Delivery</option>
+                <option>Delivered</option>
+                <option>Cancelled</option>
+                <option>Returned</option>
+              </select>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
