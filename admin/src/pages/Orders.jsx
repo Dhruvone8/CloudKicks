@@ -102,13 +102,17 @@ const Orders = ({ token }) => {
                 onChange={(e) => statusHandler(e, order._id)}
                 className="border border-gray-300 px-3 py-1 text-sm"
                 value={order.status}
+                disabled={
+                  order.status === "Cancelled" || order.status === "Returned"
+                }
               >
                 <option>Order Placed</option>
                 <option>Item Packed</option>
                 <option>Out for Delivery</option>
                 <option>Delivered</option>
-                <option>Cancelled</option>
-                <option>Returned</option>
+                {/* Only show if already set by user */}
+                {order.status === "Cancelled" && <option>Cancelled</option>}
+                {order.status === "Returned" && <option>Returned</option>}
               </select>
             </div>
           </div>
