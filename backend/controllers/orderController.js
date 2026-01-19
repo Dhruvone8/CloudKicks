@@ -243,21 +243,32 @@ const handleUpdateOrderStatus = async (req, res) => {
             message: "Order status updated successfully",
             order
         });
-
-         catch (err) {
-            console.error("Error updating order status:", err);
-            return res.status(500).json({
-                success: false,
-                message: "Failed to update order status"
-            });
-        }
     }
 
-        module.exports = {
-        handlePlaceOrder,
-        handleOrderStripe,
-        handleOrderRazorpay,
-        handleGetAllOrders,
-        handleGetUserOrders,
-        handleUpdateOrderStatus
+    catch (err) {
+        console.error("Error updating order status:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to update order status"
+        });
     }
+};
+
+// Cancel / Return order - Only users can cancel / return orders
+const handleUserCancelOrder = async(req, res) => {
+    try {
+        
+    } catch (error) {
+        
+    }
+}
+
+module.exports = {
+    handlePlaceOrder,
+    handleOrderStripe,
+    handleOrderRazorpay,
+    handleGetAllOrders,
+    handleGetUserOrders,
+    handleUpdateOrderStatus,
+    handleUserCancelOrder
+}
