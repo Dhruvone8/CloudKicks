@@ -147,12 +147,11 @@ const Cart = () => {
       <div className="border-t pt-14 min-h-[60vh] flex flex-col items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-semibold mb-4">Your cart is empty</h2>
-          <p className="text-gray-600 mb-6">
-            Add some products to get started
-          </p>
+          <p className="text-gray-600 mb-6">Add some products to get started</p>
           <button
             onClick={() => navigate("/collections")}
-            className="bg-black text-white px-8 py-3 rounded-md hover:bg-gray-800 transition-colors"
+            className="bg-black text-white py-3 rounded-md text-md my-8 px-8
+              cursor-pointer hover:scale-105 transition-all duration-300 w-full sm:w-auto shadow-md"
           >
             Continue Shopping
           </button>
@@ -220,7 +219,7 @@ const Cart = () => {
                     updateQuantity(
                       item.product._id,
                       item.size,
-                      Number(e.target.value)
+                      Number(e.target.value),
                     )
                   }
                   disabled={isUpdating}

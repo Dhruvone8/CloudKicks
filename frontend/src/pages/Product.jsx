@@ -83,7 +83,11 @@ const Product = () => {
               ))}
             </div>
             <div className="w-full sm:w-[80%]">
-              <img className="w-full h-auto" src={image} alt={productData.name} />
+              <img
+                className="w-full h-auto"
+                src={image}
+                alt={productData.name}
+              />
             </div>
           </div>
 
@@ -106,13 +110,16 @@ const Product = () => {
               <div className="flex gap-2">
                 {productData.sizes.map((item, index) => {
                   const sizeValue = typeof item === "string" ? item : item.size;
-                  const stockValue = typeof item === "object" ? item.stock : null;
+                  const stockValue =
+                    typeof item === "object" ? item.stock : null;
 
                   return (
                     <button
                       onClick={() => setSize(sizeValue)}
                       className={`border py-2 px-4 bg-gray-50 hover:bg-gray-200 transition-colors duration-200 cursor-pointer ${
-                        size === sizeValue ? "border-orange-600 bg-orange-50" : ""
+                        size === sizeValue
+                          ? "border-orange-600 bg-orange-50"
+                          : ""
                       } ${
                         stockValue === 0 ? "opacity-50 cursor-not-allowed" : ""
                       }`}
@@ -135,9 +142,7 @@ const Product = () => {
               onClick={handleAddToCart}
               disabled={addingToCart}
               className="bg-black text-white py-3 px-8 text-sm rounded-md 
-              hover:bg-gray-800 active:bg-gray-700 
-              transition-colors duration-200
-              disabled:opacity-50 disabled:cursor-not-allowed"
+             my-8 cursor-pointer hover:scale-105 transition-all duration-300 w-full sm:w-auto shadow-md"
             >
               {addingToCart ? "ADDING..." : "ADD TO CART"}
             </button>
@@ -160,11 +165,11 @@ const Product = () => {
             <p>
               An e-commerce website is an online platform that facilitates the
               buying and selling of products or services over the internet. It
-              serves as a virtual marketplace where buyers can discover, compare,
-              and purchase products directly from sellers. This platform provides
-              a seamless shopping experience with secure payment options and
-              reliable delivery services, making online shopping convenient and
-              accessible for customers worldwide.
+              serves as a virtual marketplace where buyers can discover,
+              compare, and purchase products directly from sellers. This
+              platform provides a seamless shopping experience with secure
+              payment options and reliable delivery services, making online
+              shopping convenient and accessible for customers worldwide.
             </p>
           </div>
         </div>
