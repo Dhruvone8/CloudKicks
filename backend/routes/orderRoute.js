@@ -3,10 +3,11 @@ const router = express.Router();
 const { isAdmin, isLoggedIn, isNormalUser } = require("../middlewares/checkAuth");
 const { handlePlaceOrder,
     handleOrderStripe,
+    handleVerifyStripe,
     handleOrderRazorpay,
     handleGetAllOrders,
     handleGetUserOrders,
-    handleUpdateOrderStatus,
+    handleUpdateOrderStatus
 } = require("../controllers/orderController");
 
 // Admin Features
@@ -16,7 +17,7 @@ router.post("/status", isAdmin, handleUpdateOrderStatus);
 // Payment Features
 router.post("/cod", isLoggedIn, handlePlaceOrder);
 router.post("/stripe", isLoggedIn, handleOrderStripe);
-router.post("/razorpay", isLoggedIn, handleOrderRazorpay);
+router.post("/verifyStripe", isLoggedIn, handleVerifyStripe);
 
 // User Features
 router.get("/userOrders", isLoggedIn, handleGetUserOrders);

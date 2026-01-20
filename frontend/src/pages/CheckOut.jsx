@@ -120,7 +120,7 @@ const Checkout = () => {
         city: formData.city,
         state: formData.state,
         country: formData.country,
-        zip: formData.zipCode,
+        zipcode: formData.zipCode,
         phone: formData.phone,
       };
 
@@ -133,31 +133,54 @@ const Checkout = () => {
         address: address,
       };
 
-      // Make API call to COD endpoint
-      const response = await fetch(`${backendUrl}/orders/cod`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(orderData),
-      });
+      // Handle different payment methods
+      if (method === "cod") {
+        // Cash on Delivery
+        const response = await fetch(`${backendUrl}/orders/cod`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(orderData),
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (data.success) {
-        // Clear local cart data immediately
-        setCartData([]);
-        setCartTotal(0);
+        if (data.success) {
+          setCartData([]);
+          setCartTotal(0);
+          toast.success(data.message || "Order placed successfully!");
+          setTimeout(() => {
+            navigate("/orders");
+          }, 500);
+        } else {
+          toast.error(data.message || "Failed to place order");
+          setIsProcessing(false);
+        }
+      } else if (method === "stripe") {
+        // Stripe Payment
+        const response = await fetch(`${backendUrl}/orders/stripe`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(orderData),
+        });
 
-        toast.success(data.message || "Order placed successfully!");
+        const data = await response.json();
 
-        // Navigate to orders page after a short delay
-        setTimeout(() => {
-          navigate("/orders");
-        }, 500);
-      } else {
-        toast.error(data.message || "Failed to place order");
+        if (data.success) {
+          // Redirect to Stripe checkout
+          window.location.href = data.session_url;
+        } else {
+          toast.error(data.message || "Failed to create payment session");
+          setIsProcessing(false);
+        }
+      } else if (method === "razorpay") {
+        // Razorpay Payment (to be implemented)
+        toast.error("Razorpay payment not implemented yet");
         setIsProcessing(false);
       }
     } catch (error) {
@@ -166,6 +189,7 @@ const Checkout = () => {
       setIsProcessing(false);
     }
   };
+
   return (
     <form
       ref={formRef}
@@ -343,13 +367,12 @@ const Checkout = () => {
               onValidate={() => {
                 // Check if form is valid before starting animation
                 if (formRef.current && formRef.current.checkValidity()) {
-                  return true; // Allow animation to proceed
+                  return true;
                 } else {
-                  // Show validation errors
                   if (formRef.current) {
                     formRef.current.reportValidity();
                   }
-                  return false; // Block animation
+                  return false;
                 }
               }}
               onComplete={() => {
