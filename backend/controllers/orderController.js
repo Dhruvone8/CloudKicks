@@ -189,52 +189,6 @@ const handleUpdateOrderStatus = async (req, res) => {
             });
         }
 
-        const previousStatus = order.status;
-        if (status == "Cancelled" || status == "Returned") {
-            return res.status(403).json({
-                success: false,
-                message: "Only users can cancel or return orders"
-            })
-        }
-
-        // Stock Adjustments
-        const wasCancelled = previousStatus === "Cancelled" || previousStatus === "Returned";
-        const isBeingCancelled = status === "Cancelled" || status === "Returned";
-
-        // Restore the stock if order is cancelled
-        if (isBeingCancelled && !wasCancelled) {
-            for (const item of order.items) {
-                const product = await productModel.findById(item.product);
-                if (product) {
-                    const sizeIndex = product.sizes.findIndex(s => s.size === item.size);
-                    if (sizeIndex !== -1) {
-                        product.sizes[sizeIndex].stock += item.quantity;
-                        await product.save();
-                    }
-                }
-            }
-        }
-        // Decrease the stock again if order is moved from cancelled / returned to any active status
-        else if (!isBeingCancelled && wasCancelled) {
-            for (const item of order.items) {
-                const product = await productModel.findById(item.product);
-                if (product) {
-                    const sizeIndex = product.sizes.findIndex(s => s.size === item.size);
-                    if (sizeIndex !== -1) {
-                        // Check if enough stock is available
-                        if (product.sizes[sizeIndex].stock < item.quantity) {
-                            return res.status(400).json({
-                                success: false,
-                                message: `Insufficient stock for ${product.name} in size ${item.size}`
-                            });
-                        }
-                        product.sizes[sizeIndex].stock -= item.quantity;
-                        await product.save();
-                    }
-                }
-            }
-        }
-
         order.status = status;
         await order.save();
 
@@ -254,21 +208,11 @@ const handleUpdateOrderStatus = async (req, res) => {
     }
 };
 
-// Cancel / Return order - Only users can cancel / return orders
-const handleUserCancelOrder = async(req, res) => {
-    try {
-        
-    } catch (error) {
-        
-    }
-}
-
 module.exports = {
     handlePlaceOrder,
     handleOrderStripe,
     handleOrderRazorpay,
     handleGetAllOrders,
     handleGetUserOrders,
-    handleUpdateOrderStatus,
-    handleUserCancelOrder
+    handleUpdateOrderStatus
 }

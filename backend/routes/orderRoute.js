@@ -7,7 +7,6 @@ const { handlePlaceOrder,
     handleGetAllOrders,
     handleGetUserOrders,
     handleUpdateOrderStatus,
-    handleUserCancelOrder
 } = require("../controllers/orderController");
 
 // Admin Features
@@ -21,6 +20,5 @@ router.post("/razorpay", isLoggedIn, handleOrderRazorpay);
 
 // User Features
 router.get("/userOrders", isLoggedIn, handleGetUserOrders);
-router.post("/cancel", isNormalUser, handleUserCancelOrder);
 
 module.exports = router;
