@@ -187,7 +187,7 @@ const handleOrderStripe = async (req, res) => {
                 product_data: {
                     name: "Delivery Charges"
                 },
-                unit_amount: DELIVERY_CHARGE * 100 
+                unit_amount: DELIVERY_CHARGE * 100
             },
             quantity: 1
         })
@@ -288,11 +288,6 @@ const handleVerifyStripe = async (req, res) => {
     }
 };
 
-// Placing orders using Razorpay Method
-const handleOrderRazorpay = async (req, res) => {
-    
-}
-
 // Get all orders for Admin Panel - Only Admin can access this route
 const handleGetAllOrders = async (req, res) => {
     try {
@@ -356,7 +351,6 @@ const handleUpdateOrderStatus = async (req, res) => {
             });
         }
 
-        // ADDED: Validate status
         if (!status || !ALLOWED_ORDER_STATUSES.includes(status)) {
             return res.status(400).json({
                 success: false,
@@ -396,7 +390,6 @@ module.exports = {
     handlePlaceOrder,
     handleOrderStripe,
     handleVerifyStripe,
-    handleOrderRazorpay,
     handleGetAllOrders,
     handleGetUserOrders,
     handleUpdateOrderStatus

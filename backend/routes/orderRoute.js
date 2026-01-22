@@ -4,7 +4,6 @@ const { isAdmin, isLoggedIn, isNormalUser } = require("../middlewares/checkAuth"
 const { handlePlaceOrder,
     handleOrderStripe,
     handleVerifyStripe,
-    handleOrderRazorpay,
     handleGetAllOrders,
     handleGetUserOrders,
     handleUpdateOrderStatus
