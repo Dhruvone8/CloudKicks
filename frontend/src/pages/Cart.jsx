@@ -112,10 +112,10 @@ const Cart = () => {
   if (!token) {
     return (
       <>
-        <div className="border-t pt-14 min-h-[60vh] flex flex-col items-center justify-center">
+        <div className="border-t border-gray-300 pt-14 min-h-[60vh] flex flex-col items-center justify-center bg-white">
           <div className="text-center">
-            <h2 className="text-2xl font-semibold mb-4">Your cart is empty</h2>
-            <p className="text-gray-600 mb-6">Please login to view your cart</p>
+            <h2 className="text-2xl font-semibold mb-4 text-gray-900">Your cart is empty</h2>
+            <p className="text-gray-700 mb-6">Please login to view your cart</p>
             <button
               onClick={() => setAuthDialogOpen(true)}
               className="bg-black text-white px-8 py-3 rounded-md hover:bg-gray-800 transition-colors"
@@ -132,10 +132,10 @@ const Cart = () => {
   // Show loading state
   if (loading) {
     return (
-      <div className="border-t pt-14 min-h-[60vh] flex items-center justify-center">
+      <div className="border-t border-gray-300 pt-14 min-h-[60vh] flex items-center justify-center bg-white">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading cart...</p>
+          <p className="text-gray-700">Loading cart...</p>
         </div>
       </div>
     );
@@ -144,10 +144,10 @@ const Cart = () => {
   // Show empty cart message
   if (cartData.length === 0) {
     return (
-      <div className="border-t pt-14 min-h-[60vh] flex flex-col items-center justify-center">
+      <div className="border-t border-gray-300 pt-14 min-h-[60vh] flex flex-col items-center justify-center bg-white">
         <div className="text-center">
-          <h2 className="text-2xl font-semibold mb-4">Your cart is empty</h2>
-          <p className="text-gray-600 mb-6">Add some products to get started</p>
+          <h2 className="text-2xl font-semibold mb-4 text-gray-900">Your cart is empty</h2>
+          <p className="text-gray-700 mb-6">Add some products to get started</p>
           <button
             onClick={() => navigate("/collections")}
             className="bg-black text-white py-3 rounded-md text-md my-8 px-8
@@ -161,7 +161,7 @@ const Cart = () => {
   }
 
   return (
-    <div className="border-t pt-14">
+    <div className="border-t border-gray-300 pt-14 bg-white">
       <div className="text-2xl mb-3">
         <Title text1="YOUR" text2="CART" />
       </div>
@@ -180,27 +180,27 @@ const Cart = () => {
           return (
             <div
               key={uniqueId}
-              className="py-4 border-t border-b text-gray-700 grid 
-              grid-cols-2 sm:grid-cols-[4fr_1fr_0.5fr] 
+              className="py-4 border border-gray-300 rounded-lg px-4 bg-white text-gray-900 
+              grid grid-cols-1 sm:grid-cols-[4fr_1fr_0.5fr] 
               items-center gap-4"
             >
-              <div className="col-span-2 sm:col-span-1 flex items-start gap-4">
+              <div className="flex items-start gap-4">
                 <img
                   src={imageUrl}
                   alt={productData.name}
-                  className="w-20 sm:w-20 object-cover aspect-square rounded-sm"
+                  className="w-20 sm:w-20 object-cover aspect-square rounded border border-gray-300"
                 />
                 <div className="flex flex-col justify-center">
-                  <p className="text-sm sm:text-lg font-medium text-gray-800">
+                  <p className="text-sm sm:text-lg font-medium text-gray-900">
                     {productData.name}
                   </p>
                   <div className="flex items-center gap-3 mt-2">
-                    <p className="text-base text-gray-600 font-semibold">
+                    <p className="text-base text-gray-900 font-semibold">
                       {currency}
                       {productData.price}
                     </p>
                     {item.size && (
-                      <p className="px-2 py-1 border bg-slate-50 rounded-md text-xs text-gray-600">
+                      <p className="px-2 py-1 border border-gray-300 bg-gray-50 rounded-md text-xs text-gray-800">
                         {item.size}
                       </p>
                     )}

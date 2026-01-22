@@ -67,36 +67,36 @@ const Navbar = () => {
 
   return (
     <>
-      <div className="flex items-center justify-between py-5 font-medium">
+      <div className="flex items-center justify-between py-5 font-medium bg-white">
         <img
           src={assets.logo}
           className="w-19 h-12 object-contain cursor-pointer"
           alt="CloudKicks Logo"
           onClick={() => (window.location.href = "/")}
         />
-        <ul className="hidden sm:flex gap-5 text-sm text-gray-700">
+        <ul className="hidden sm:flex gap-5 text-sm text-gray-800">
           <NavLink to="/" className="flex flex-col items-center gap-1">
             <p>HOME</p>
-            <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
+            <hr className="w-2/4 border-none h-[1.5px] bg-gray-800 hidden" />
           </NavLink>
           <NavLink
             to="/collections"
             className="flex flex-col items-center gap-1"
           >
             <p>COLLECTIONS</p>
-            <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
+            <hr className="w-2/4 border-none h-[1.5px] bg-gray-800 hidden" />
           </NavLink>
           <NavLink to="/about" className="flex flex-col items-center gap-1">
             <p>ABOUT</p>
-            <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
+            <hr className="w-2/4 border-none h-[1.5px] bg-gray-800 hidden" />
           </NavLink>
           <NavLink to="/contact" className="flex flex-col items-center gap-1">
             <p>CONTACT</p>
-            <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
+            <hr className="w-2/4 border-none h-[1.5px] bg-gray-800 hidden" />
           </NavLink>
         </ul>
 
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 sm:gap-6">
           <img
             onClick={() => setShowSearch(true)}
             src={assets.search_icon}
@@ -111,10 +111,10 @@ const Navbar = () => {
               alt="Profile"
             />
             <div className="group-hover:block hidden absolute dropdown-menu right-0 pt-4 z-50">
-              <div className="flex flex-col gap-2 w-36 py-3 px-5 bg-slate-100 text-gray-500 rounded shadow-lg">
+              <div className="flex flex-col gap-2 w-36 py-3 px-5 bg-white border border-gray-300 text-gray-800 rounded shadow-lg">
                 {token && user ? (
                   <>
-                    <p className="text-xs text-gray-700 font-medium border-b pb-2">
+                    <p className="text-xs text-gray-900 font-medium border-b border-gray-300 pb-2">
                       Welcome,{" "}
                       {user.name || user.email?.split("@")[0] || "User"}
                     </p>
@@ -177,12 +177,13 @@ const Navbar = () => {
           />
         </div>
 
+        {/* Mobile Menu */}
         <div
-          className={`absolute top-0 right-0 bottom-0 overflow-hidden bg-white transition-all z-50 ${
+          className={`fixed top-0 right-0 bottom-0 overflow-hidden bg-white transition-all z-50 ${
             visible ? "w-full" : "w-0"
           }`}
         >
-          <div className="flex flex-col text-gray-600">
+          <div className="flex flex-col text-gray-800">
             <div
               onClick={() => setVisible(false)}
               className="flex items-center gap-4 p-3 ml-auto cursor-pointer"
@@ -192,28 +193,28 @@ const Navbar = () => {
 
             <NavLink
               onClick={() => setVisible(false)}
-              className="py-2 pl-6 border"
+              className="py-3 pl-6 border-b border-gray-300"
               to="/"
             >
               HOME
             </NavLink>
             <NavLink
               onClick={() => setVisible(false)}
-              className="py-2 pl-6 border"
+              className="py-3 pl-6 border-b border-gray-300"
               to="/collections"
             >
               COLLECTIONS
             </NavLink>
             <NavLink
               onClick={() => setVisible(false)}
-              className="py-2 pl-6 border"
+              className="py-3 pl-6 border-b border-gray-300"
               to="/about"
             >
               ABOUT
             </NavLink>
             <NavLink
               onClick={() => setVisible(false)}
-              className="py-2 pl-6 border"
+              className="py-3 pl-6 border-b border-gray-300"
               to="/contact"
             >
               CONTACT
@@ -221,19 +222,19 @@ const Navbar = () => {
 
             {token && user ? (
               <>
-                <div className="py-2 pl-6 border text-gray-700 font-medium">
+                <div className="py-3 pl-6 border-b border-gray-300 text-gray-900 font-medium">
                   Hello, {user.name || user.email?.split("@")[0] || "User"}
                 </div>
                 <NavLink
                   onClick={() => setVisible(false)}
-                  className="py-2 pl-6 border"
+                  className="py-3 pl-6 border-b border-gray-300"
                   to="/orders"
                 >
                   MY ORDERS
                 </NavLink>
                 <button
                   onClick={handleLogout}
-                  className="py-2 pl-6 border text-left text-red-600 font-medium"
+                  className="py-3 pl-6 border-b border-gray-300 text-left text-red-600 font-medium"
                 >
                   LOGOUT
                 </button>
@@ -244,7 +245,7 @@ const Navbar = () => {
                   setVisible(false);
                   setAuthDialogOpen(true);
                 }}
-                className="py-2 pl-6 border text-left font-medium"
+                className="py-3 pl-6 border-b border-gray-300 text-left font-medium"
               >
                 LOGIN/REGISTER
               </button>

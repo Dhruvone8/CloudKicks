@@ -22,17 +22,17 @@ const App = () => {
   }, [token]);
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-white min-h-screen">
       <Toaster richColors position="top-right" />
       {token === "" ? (
         <AdminLogin setToken={setToken} />
       ) : (
         <>
           <AdminNavbar setToken={setToken} />
-          <hr />
+          <hr className="border-gray-300" />
           <div className="flex w-full">
             <AdminSidebar />
-            <div className="w-[70%] mx-auto ml-[max(5vw, 25px)] my-8 text-gray-600 text-base">
+            <div className="w-[70%] mx-auto ml-[max(5vw, 25px)] my-8 text-gray-800 text-base">
               <Routes>
                 <Route path="/add" element={<AddProducts token={token} />} />
                 <Route path="/list" element={<ListProducts token={token} />} />

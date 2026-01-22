@@ -12,16 +12,19 @@ const ProductComponent = ({ id, image, name, price }) => {
     : '';
 
   return (
-    <Link className="text-gray-700 cursor-pointer" to={`/product/${id}`}>
-      <div className="overflow-hidden">
+    <Link 
+      className="text-gray-900 cursor-pointer group" 
+      to={`/product/${id}`}
+    >
+      <div className="overflow-hidden border border-gray-300 rounded-lg bg-white">
         <img
-          className="hover:scale-110 transition duration-300 ease-in-out"
+          className="hover:scale-110 transition duration-300 ease-in-out w-full h-auto"
           src={imageUrl}
           alt={name || "Product"}
         />
       </div>
-      <p className="pt-3 pb-1 text-sm font-semibold">{name}</p>
-      <p className="text-sm font-semibold">
+      <p className="pt-3 pb-1 text-sm font-semibold text-gray-800">{name}</p>
+      <p className="text-sm font-semibold text-gray-900">
         {currency}
         {price}
       </p>

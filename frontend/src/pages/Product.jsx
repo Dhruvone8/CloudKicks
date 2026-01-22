@@ -68,46 +68,48 @@ const Product = () => {
 
   return productData ? (
     <>
-      <div className="border-t-2 pt-10 transition-opacity ease-in duration-500 opacity-100">
-        <div className="flex gap-12 sm:gap-12 flex-col sm:flex-row">
+      <div className="border-t-2 border-gray-300 pt-10 transition-opacity ease-in duration-500 opacity-100">
+        <div className="flex gap-8 sm:gap-12 flex-col lg:flex-row">
+          {/* Product Images */}
           <div className="flex-1 flex flex-col-reverse gap-3 sm:flex-row">
-            <div className="flex sm:flex-col overflow-x-auto sm:overflow-y-scroll justify-between sm:justify-normal sm:w-[18.7%] w-full">
+            <div className="flex sm:flex-col overflow-x-auto sm:overflow-y-scroll justify-between sm:justify-normal sm:w-[18.7%] w-full gap-2 sm:gap-3">
               {productData.image.map((item, index) => (
                 <img
                   onClick={() => setImage(item)}
                   key={index}
                   src={item}
                   alt={`Product ${index}`}
-                  className="w-[24%] sm:w-full sm:mb-3 cursor-pointer shrink-0"
+                  className="w-[24%] sm:w-full sm:mb-0 cursor-pointer shrink-0 border border-gray-300 rounded hover:border-gray-900 transition-colors"
                 />
               ))}
             </div>
             <div className="w-full sm:w-[80%]">
               <img
-                className="w-full h-auto"
+                className="w-full h-auto border border-gray-300 rounded-lg"
                 src={image}
                 alt={productData.name}
               />
             </div>
           </div>
 
+          {/* Product Info */}
           <div className="flex-1">
-            <h1 className="text-2xl font-medium mt-2">{productData.name}</h1>
+            <h1 className="text-2xl font-medium mt-2 text-gray-900">{productData.name}</h1>
             <div className="flex items-center gap-2 mt-2">
-              <img src={assets.star_icon} alt="" className="w-3 5" />
-              <img src={assets.star_icon} alt="" className="w-3 5" />
-              <img src={assets.star_icon} alt="" className="w-3 5" />
-              <img src={assets.star_icon} alt="" className="w-3 5" />
-              <img src={assets.star_dull_icon} alt="" className="w-3 5" />
-              <p className="pl-2">84 Reviews</p>
+              <img src={assets.star_icon} alt="" className="w-3.5" />
+              <img src={assets.star_icon} alt="" className="w-3.5" />
+              <img src={assets.star_icon} alt="" className="w-3.5" />
+              <img src={assets.star_icon} alt="" className="w-3.5" />
+              <img src={assets.star_dull_icon} alt="" className="w-3.5" />
+              <p className="pl-2 text-gray-700">84 Reviews</p>
             </div>
-            <p className="mt-5 text-3xl font-medium">
+            <p className="mt-5 text-3xl font-medium text-gray-900">
               {currency}
               {productData.price}
             </p>
             <div className="flex flex-col gap-4 my-8">
-              <p>Select Size</p>
-              <div className="flex gap-2">
+              <p className="text-gray-900 font-medium">Select Size</p>
+              <div className="flex gap-2 flex-wrap">
                 {productData.sizes.map((item, index) => {
                   const sizeValue = typeof item === "string" ? item : item.size;
                   const stockValue =
@@ -116,9 +118,9 @@ const Product = () => {
                   return (
                     <button
                       onClick={() => setSize(sizeValue)}
-                      className={`border py-2 px-4 bg-gray-50 hover:bg-gray-200 transition-colors duration-200 cursor-pointer ${
+                      className={`border border-gray-300 py-2 px-4 bg-white hover:bg-gray-100 hover:border-gray-900 transition-colors duration-200 cursor-pointer rounded ${
                         size === sizeValue
-                          ? "border-orange-600 bg-orange-50"
+                          ? "border-black bg-gray-100 ring-2 ring-black"
                           : ""
                       } ${
                         stockValue === 0 ? "opacity-50 cursor-not-allowed" : ""
@@ -126,9 +128,9 @@ const Product = () => {
                       key={index}
                       disabled={stockValue === 0}
                     >
-                      {sizeValue}
+                      <span className="text-gray-900 font-medium">{sizeValue}</span>
                       {stockValue !== null && stockValue === 0 && (
-                        <span className="text-xs block text-red-500">
+                        <span className="text-xs block text-red-600 mt-1">
                           Out of Stock
                         </span>
                       )}
@@ -142,27 +144,32 @@ const Product = () => {
               onClick={handleAddToCart}
               disabled={addingToCart}
               className="bg-black text-white py-3 px-8 text-sm rounded-md 
-             my-8 cursor-pointer hover:scale-105 transition-all duration-300 w-full sm:w-auto shadow-md"
+             my-8 cursor-pointer hover:scale-105 transition-all duration-300 w-full sm:w-auto shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {addingToCart ? "ADDING..." : "ADD TO CART"}
             </button>
 
             <hr className="mt-4 sm:w-4/5 border-gray-300" />
-            <div className="text-sm text-gray-500 mt-5 flex flex-col gap-1">
-              <p>100% Original Product</p>
-              <p>Cash on Delivery Accepted</p>
-              <p>Easy Returns and Exchange Policies within 7 Days</p>
+            <div className="text-sm text-gray-700 mt-5 flex flex-col gap-2">
+              <p>✓ 100% Original Product</p>
+              <p>✓ Cash on Delivery Accepted</p>
+              <p>✓ Easy Returns and Exchange Policies within 7 Days</p>
             </div>
           </div>
         </div>
 
+        {/* Description & Reviews */}
         <div className="mt-20">
-          <div className="flex">
-            <b className="border px-5 py-3 text-sm">Description</b>
-            <p className="border px-5 py-3 text-sm">Reviews (83)</p>
+          <div className="flex border-b border-gray-300">
+            <button className="border-b-2 border-black px-5 py-3 text-sm font-medium text-gray-900">
+              Description
+            </button>
+            <button className="px-5 py-3 text-sm text-gray-700 hover:text-gray-900">
+              Reviews (83)
+            </button>
           </div>
-          <div className="flex flex-col gap-4 border text-sm px-6 py-6 text-gray-500">
-            <p>
+          <div className="flex flex-col gap-4 border border-gray-300 border-t-0 text-sm px-6 py-6 text-gray-700 bg-white rounded-b-lg">
+            <p className="leading-relaxed">
               An e-commerce website is an online platform that facilitates the
               buying and selling of products or services over the internet. It
               serves as a virtual marketplace where buyers can discover,
