@@ -85,15 +85,8 @@ const Navbar = () => {
             >
               {({ isActive }) => (
                 <>
-                  <p>
-                    {path === "/"
-                      ? "HOME"
-                      : path.replace("/", "").toUpperCase()}
-                  </p>
-                  <hr
-                    className={`w-2/4 h-[1.5px] bg-gray-800 border-none ${isActive ? "" : "hidden"
-                      }`}
-                  />
+                  <p>{path === "/" ? "HOME" : path.replace("/", "").toUpperCase()}</p>
+                  <hr className={`w-2/4 h-[1.5px] bg-gray-800 border-none ${isActive ? "" : "hidden"}`} />
                 </>
               )}
             </NavLink>
@@ -110,28 +103,18 @@ const Navbar = () => {
               onClick={() => setShowSearch(true)}
             />
           )}
+          
           {/* PROFILE DROPDOWN */}
           <div className="group relative hidden sm:block">
-            <img
-              src={assets.profile_icon}
-              className="w-5 cursor-pointer"
-              alt="Profile"
-            />
+            <img src={assets.profile_icon} className="w-5 cursor-pointer" alt="Profile" />
             <div className="group-hover:block hidden absolute right-0 pt-4 z-50">
               <div className="w-36 py-3 px-5 bg-white border rounded shadow">
                 {token ? (
                   <>
-                    <p className="text-xs border-b pb-2 mb-2">
-                      Welcome, {user?.name || "User"}
-                    </p>
+                    <p className="text-xs border-b pb-2 mb-2">Welcome, {user?.name || "User"}</p>
                     <Link to="/orders">My Orders</Link>
                     <hr className="my-2" />
-                    <button
-                      onClick={handleLogout}
-                      className="text-red-600 font-medium"
-                    >
-                      Logout
-                    </button>
+                    <button onClick={handleLogout} className="text-red-600 font-medium">Logout</button>
                   </>
                 ) : (
                   <button onClick={() => setAuthDialogOpen(true)}>
@@ -167,6 +150,19 @@ const Navbar = () => {
             alt="Menu"
             onClick={() => setVisible(true)}
           />
+        </div>
+
+        <div className={`absolute top-0 right-0 bottom-0 overflow-hidden bg-white transition-all h-screen ${visible ? 'w-full' : 'w-0'}`}>
+          <div className='flex flex-col text-gray-600'>
+            <div onClick={() => setVisible(false)} className='flex items-center gap-4 p-3 cursor-pointer'>
+              <img className='h-4 rotate-180' src={assets.dropdown_icon || assets.menu_icon} alt="Back" />
+              <p>Back</p>
+            </div>
+            <NavLink onClick={() => setVisible(false)} className='py-2 pl-6 border' to='/'>HOME</NavLink>
+            <NavLink onClick={() => setVisible(false)} className='py-2 pl-6 border' to='/collections'>COLLECTIONS</NavLink>
+            <NavLink onClick={() => setVisible(false)} className='py-2 pl-6 border' to='/about'>ABOUT</NavLink>
+            <NavLink onClick={() => setVisible(false)} className='py-2 pl-6 border' to='/contact'>CONTACT</NavLink>
+          </div>
         </div>
       </div>
 
