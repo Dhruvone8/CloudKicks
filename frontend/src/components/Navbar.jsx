@@ -196,7 +196,7 @@ const Navbar = () => {
 
           {/* Admin Panel Button - Available for all users */}
           <a
-            href={import.meta.env.VITE_ADMIN_URL || "http://localhost:5174"}
+            href={import.meta.env.VITE_ADMIN_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="hidden sm:block bg-black text-white px-4 py-2 rounded-md text-xs font-medium hover:scale-105 transition-smooth duration-300 ease-in-out"
@@ -301,7 +301,7 @@ const Navbar = () => {
 
                 {/* Admin Panel Link - Available for all users */}
                 <a
-                  href="http://localhost:5174"
+                  href="https://cloudkicks-admin-panel.vercel.app/"
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setVisible(false)}
