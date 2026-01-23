@@ -110,8 +110,8 @@ const Orders = ({ token }) => {
                 value={order.status}
               >
                 <option value="Order Placed">Order Placed</option>
-                <option value="Item Packed">Item Packed</option>
-                <option value="Out for Delivery">Out for Delivery</option>
+                <option value="Packing">Packing</option>
+                <option value="Out for delivery">Out for delivery</option>
                 <option value="Delivered">Delivered</option>
               </select>
             </div>
