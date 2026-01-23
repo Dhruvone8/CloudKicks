@@ -54,7 +54,9 @@ const Orders = ({ token }) => {
         {orders.map((order) => (
           <div
             key={order._id}
-            className="border border-gray-200 p-6 flex gap-6 items-start"
+            className="border border-gray-200 p-4 md:p-6 
+             flex flex-col md:flex-row 
+             gap-4 md:gap-6"
           >
             {/* ICON */}
             <img
@@ -87,7 +89,7 @@ const Orders = ({ token }) => {
             </div>
 
             {/* ORDER META */}
-            <div className="text-sm space-y-1 min-w-[160px]">
+            <div className="text-sm space-y-1 md:min-w-[160px]">
               <p>Items : {order.items.length}</p>
               <p>Method : {order.paymentMethod}</p>
               <p>Payment : {order.isPaid ? "Paid" : "Pending"}</p>
@@ -95,12 +97,16 @@ const Orders = ({ token }) => {
             </div>
 
             {/* PRICE + STATUS */}
-            <div className="flex flex-col items-end gap-3 min-w-[120px]">
+            <div
+              className="flex flex-row md:flex-col 
+                justify-between md:items-end 
+                gap-3 md:min-w-[120px]"
+            >
               <p className="font-semibold">${order.amount}</p>
 
               <select
                 onChange={(e) => statusHandler(e, order._id)}
-                className="border border-gray-300 px-3 py-1 text-sm"
+                className="border border-gray-300 px-3 py-1 text-sm w-full md:w-auto"
                 value={order.status}
               >
                 <option value="Order Placed">Order Placed</option>
