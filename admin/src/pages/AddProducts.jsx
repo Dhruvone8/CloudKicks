@@ -106,14 +106,14 @@ const AddProducts = ({ token }) => {
     e.preventDefault();
 
     // Validation - only check for images if not in edit mode OR if all images were removed
-    if (!isEditMode && images.length === 0) {
-      toast.error("Please upload at least one image");
+    if (isEditMode && images.length === 0 && existingImages.length === 0) {
+      toast.error("Please keep or upload at least one image");
       return;
     }
 
     // In edit mode, check if there's at least one image (existing or new)
-    if (isEditMode && images.length === 0 && existingImages.length === 0) {
-      toast.error("Please keep or upload at least one image");
+    if (!isEditMode && images.length === 0) {
+      toast.error("Please upload at least one image");
       return;
     }
 

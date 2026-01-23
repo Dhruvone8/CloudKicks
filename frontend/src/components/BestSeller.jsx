@@ -9,7 +9,8 @@ const BestSeller = () => {
   const [BestSeller, setBestSeller] = useState([]);
 
   useEffect(() => {
-    const bestProduct = products.filter((item) => item.bestseller);
+    // FIXED: Changed from item.bestseller to item.bestSeller to match backend model
+    const bestProduct = products.filter((item) => item.bestSeller);
     setBestSeller(bestProduct.slice(0, 5));
   }, [products]);
 

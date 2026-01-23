@@ -44,7 +44,7 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
-app.options("*", cors());
+app.options("/*", cors());
 
 app.use(cookieParser());
 app.set("trust proxy", 1);
