@@ -7,20 +7,18 @@ import AuthDialog from "./ui/authDialog";
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+
   const { setShowSearch, getCartCount, token, user, logout, isLoading } =
     useContext(ShopContext);
+
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Check if auth dialog should be open based on URL
   const authDialogOpen = searchParams.get("auth") === "true";
 
   const setAuthDialogOpen = (open) => {
-    if (open) {
-      setSearchParams({ auth: "true" });
-    } else {
-      setSearchParams({});
-    }
+    if (open) setSearchParams({ auth: "true" });
+    else setSearchParams({});
   };
 
   useEffect(() => {
@@ -36,9 +34,7 @@ const Navbar = () => {
     fetchCartCount();
 
     const interval = setInterval(() => {
-      if (token) {
-        fetchCartCount();
-      }
+      if (token) fetchCartCount();
     }, 30000);
 
     return () => clearInterval(interval);
@@ -51,312 +47,119 @@ const Navbar = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-between py-5 font-medium">
+      <div className="relative z-50 flex items-center justify-between py-5 font-medium bg-white">
         <img
           src={assets.logo}
           className="w-19 h-12 object-contain cursor-pointer"
           alt="CloudKicks Logo"
           onClick={() => (window.location.href = "/")}
         />
-        <div className="flex items-center gap-6">
-          <div className="w-8 h-8 bg-gray-200 animate-pulse rounded-full"></div>
-        </div>
+        <div className="w-8 h-8 bg-gray-200 animate-pulse rounded-full" />
       </div>
     );
   }
 
   return (
     <>
-      <div className="flex items-center justify-between py-5 font-medium bg-white">
+      {/* ✅ Z-INDEX FIXED NAVBAR */}
+      <div className="relative z-50 flex items-center justify-between py-5 font-medium bg-white">
         <img
           src={assets.logo}
           className="w-19 h-12 object-contain cursor-pointer"
           alt="CloudKicks Logo"
-          onClick={() => (window.location.href = "/")}
+          onClick={() => navigate("/")}
         />
+
+        {/* DESKTOP LINKS */}
         <ul className="hidden sm:flex gap-5 text-sm text-gray-800">
-          <NavLink to="/" className="flex flex-col items-center gap-1">
-            {({ isActive }) => (
-              <>
-                <p>HOME</p>
-                <hr
-                  className={`w-2/4 border-none h-[1.5px] bg-gray-800 ${isActive ? "" : "hidden"}`}
-                />
-              </>
-            )}
-          </NavLink>
-          <NavLink
-            to="/collections"
-            className="flex flex-col items-center gap-1"
-          >
-            {({ isActive }) => (
-              <>
-                <p>COLLECTIONS</p>
-                <hr
-                  className={`w-2/4 border-none h-[1.5px] bg-gray-800 ${isActive ? "" : "hidden"}`}
-                />
-              </>
-            )}
-          </NavLink>
-          <NavLink to="/about" className="flex flex-col items-center gap-1">
-            {({ isActive }) => (
-              <>
-                <p>ABOUT</p>
-                <hr
-                  className={`w-2/4 border-none h-[1.5px] bg-gray-800 ${isActive ? "" : "hidden"}`}
-                />
-              </>
-            )}
-          </NavLink>
-          <NavLink to="/contact" className="flex flex-col items-center gap-1">
-            {({ isActive }) => (
-              <>
-                <p>CONTACT</p>
-                <hr
-                  className={`w-2/4 border-none h-[1.5px] bg-gray-800 ${isActive ? "" : "hidden"}`}
-                />
-              </>
-            )}
-          </NavLink>
+          {["/", "/collections", "/about", "/contact"].map((path, i) => (
+            <NavLink key={i} to={path} className="flex flex-col items-center gap-1">
+              {({ isActive }) => (
+                <>
+                  <p>
+                    {path === "/"
+                      ? "HOME"
+                      : path.replace("/", "").toUpperCase()}
+                  </p>
+                  <hr
+                    className={`w-2/4 h-[1.5px] bg-gray-800 border-none ${
+                      isActive ? "" : "hidden"
+                    }`}
+                  />
+                </>
+              )}
+            </NavLink>
+          ))}
         </ul>
 
+        {/* RIGHT ICONS */}
         <div className="flex items-center gap-4 sm:gap-6">
           <img
-            onClick={() => setShowSearch(true)}
             src={assets.search_icon}
             className="w-5 cursor-pointer"
             alt="Search"
+            onClick={() => setShowSearch(true)}
           />
 
+          {/* PROFILE DROPDOWN */}
           <div className="group relative hidden sm:block">
             <img
               src={assets.profile_icon}
               className="w-5 cursor-pointer"
               alt="Profile"
             />
-            <div className="group-hover:block hidden absolute dropdown-menu right-0 pt-4 z-50">
-              <div className="flex flex-col gap-2 w-36 py-3 px-5 bg-white border border-gray-300 text-gray-800 rounded shadow-lg">
-                {token && user ? (
+            <div className="group-hover:block hidden absolute right-0 pt-4 z-50">
+              <div className="w-36 py-3 px-5 bg-white border rounded shadow">
+                {token ? (
                   <>
-                    <p className="text-xs text-gray-900 font-medium border-b border-gray-300 pb-2">
-                      Welcome,{" "}
-                      {user.name || user.email?.split("@")[0] || "User"}
+                    <p className="text-xs border-b pb-2 mb-2">
+                      Welcome, {user?.name || "User"}
                     </p>
-                    <Link
-                      to="/orders"
-                      className="cursor-pointer hover:text-black"
-                    >
-                      My Orders
-                    </Link>
-                    <hr className="border-gray-300" />
+                    <Link to="/orders">My Orders</Link>
+                    <hr className="my-2" />
                     <button
                       onClick={handleLogout}
-                      className="text-left cursor-pointer hover:text-black font-medium text-red-600"
+                      className="text-red-600 font-medium"
                     >
                       Logout
                     </button>
                   </>
                 ) : (
-                  <button
-                    onClick={() => setAuthDialogOpen(true)}
-                    className="text-left cursor-pointer hover:text-black font-medium"
-                  >
-                    Login/Register
+                  <button onClick={() => setAuthDialogOpen(true)}>
+                    Login / Register
                   </button>
                 )}
               </div>
             </div>
           </div>
 
-          <img
-            src={assets.profile_icon}
-            className="w-5 cursor-pointer sm:hidden"
-            alt="Profile"
-            onClick={() => {
-              if (token && user) {
-                setVisible(true);
-              } else {
-                setAuthDialogOpen(true);
-              }
-            }}
-          />
-
+          {/* CART */}
           <Link to="/cart" className="relative">
-            <img
-              src={assets.cart_icon}
-              className="w-5 min-w-5 cursor-pointer"
-              alt="Cart"
-            />
+            <img src={assets.cart_icon} className="w-5" alt="Cart" />
             {cartCount > 0 && (
-              <p className="absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]">
+              <span className="absolute -right-1 -bottom-1 w-4 h-4 bg-black text-white text-[8px] rounded-full flex items-center justify-center">
                 {cartCount}
-              </p>
+              </span>
             )}
           </Link>
 
-          {/* Admin Panel Button - Available for all users */}
+          {/* ✅ ADMIN PANEL BUTTON (CLICKABLE NOW) */}
           <a
             href={import.meta.env.VITE_ADMIN_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:block bg-black text-white px-4 py-2 rounded-md text-xs font-medium hover:scale-105 transition-smooth duration-300 ease-in-out"
+            className="hidden sm:block z-50 bg-black text-white px-4 py-2 rounded-md text-xs font-medium hover:scale-105 transition-all"
           >
             Admin Panel
           </a>
 
+          {/* MOBILE MENU ICON */}
           <img
-            onClick={() => setVisible(true)}
             src={assets.menu_icon}
-            alt=""
             className="w-5 cursor-pointer sm:hidden"
+            alt="Menu"
+            onClick={() => setVisible(true)}
           />
-        </div>
-
-        {/* Mobile Menu */}
-        <div
-          className={`fixed top-0 right-0 bottom-0 overflow-hidden bg-white transition-all z-50 ${
-            visible ? "w-full" : "w-0"
-          }`}
-        >
-          <div className="flex flex-col text-gray-800 h-full">
-            <div
-              onClick={() => setVisible(false)}
-              className="flex items-center justify-between p-5 border-b border-gray-200"
-            >
-              <img
-                src={assets.logo}
-                className="w-16 h-10 object-contain"
-                alt="CloudKicks Logo"
-              />
-              <img className="h-5" src={assets.cross_icon} alt="Close" />
-            </div>
-
-            <div className="flex-1 overflow-y-auto">
-              <nav className="py-4">
-                <NavLink
-                  onClick={() => setVisible(false)}
-                  className={({ isActive }) =>
-                    `flex items-center justify-between py-4 px-6 text-base hover:bg-gray-50 transition-colors ${
-                      isActive ? "font-semibold text-gray-900" : "text-gray-800"
-                    }`
-                  }
-                  to="/"
-                >
-                  <span>HOME</span>
-                  <span className="text-gray-400">›</span>
-                </NavLink>
-                <NavLink
-                  onClick={() => setVisible(false)}
-                  className={({ isActive }) =>
-                    `flex items-center justify-between py-4 px-6 text-base hover:bg-gray-50 transition-colors ${
-                      isActive ? "font-semibold text-gray-900" : "text-gray-800"
-                    }`
-                  }
-                  to="/collections"
-                >
-                  <span>COLLECTIONS</span>
-                  <span className="text-gray-400">›</span>
-                </NavLink>
-                <NavLink
-                  onClick={() => setVisible(false)}
-                  className={({ isActive }) =>
-                    `flex items-center justify-between py-4 px-6 text-base hover:bg-gray-50 transition-colors ${
-                      isActive ? "font-semibold text-gray-900" : "text-gray-800"
-                    }`
-                  }
-                  to="/about"
-                >
-                  <span>ABOUT</span>
-                  <span className="text-gray-400">›</span>
-                </NavLink>
-                <NavLink
-                  onClick={() => setVisible(false)}
-                  className={({ isActive }) =>
-                    `flex items-center justify-between py-4 px-6 text-base hover:bg-gray-50 transition-colors ${
-                      isActive ? "font-semibold text-gray-900" : "text-gray-800"
-                    }`
-                  }
-                  to="/contact"
-                >
-                  <span>CONTACT</span>
-                  <span className="text-gray-400">›</span>
-                </NavLink>
-
-                {token && user && (
-                  <NavLink
-                    onClick={() => setVisible(false)}
-                    className={({ isActive }) =>
-                      `flex items-center justify-between py-4 px-6 text-base hover:bg-gray-50 transition-colors ${
-                        isActive
-                          ? "font-semibold text-gray-900"
-                          : "text-gray-800"
-                      }`
-                    }
-                    to="/orders"
-                  >
-                    <span>MY ORDERS</span>
-                    <span className="text-gray-400">›</span>
-                  </NavLink>
-                )}
-
-                {/* Admin Panel Link - Available for all users */}
-                <a
-                  href="https://cloudkicks-admin-panel.vercel.app/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setVisible(false)}
-                  className="flex items-center justify-between py-4 px-6 text-base hover:bg-gray-50 transition-colors text-gray-800"
-                >
-                  <span>ADMIN PANEL</span>
-                  <span className="text-gray-400">›</span>
-                </a>
-              </nav>
-
-              <div className="border-t border-gray-200 mt-4">
-                {token && user ? (
-                  <div className="py-6 px-6">
-                    <p className="text-sm text-gray-500 mb-4">
-                      Hello, {user.name || user.email?.split("@")[0] || "User"}
-                    </p>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full bg-black text-white py-3 px-6 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
-                    >
-                      LOGOUT
-                    </button>
-                  </div>
-                ) : (
-                  <div className="py-6 px-6 space-y-3">
-                    <p className="text-sm text-gray-700 mb-4">
-                      Become a Member for the best products, inspiration and
-                      stories in sport.{" "}
-                      <span className="underline cursor-pointer">
-                        Learn more
-                      </span>
-                    </p>
-                    <button
-                      onClick={() => {
-                        setVisible(false);
-                        setAuthDialogOpen(true);
-                      }}
-                      className="w-full bg-black text-white py-3 px-6 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
-                    >
-                      JOIN US
-                    </button>
-                    <button
-                      onClick={() => {
-                        setVisible(false);
-                        setAuthDialogOpen(true);
-                      }}
-                      className="w-full border border-gray-300 text-gray-800 py-3 px-6 rounded-full text-sm font-medium hover:border-gray-400 transition-colors"
-                    >
-                      SIGN IN
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
