@@ -1,7 +1,7 @@
 import React from "react";
 import Title from "../components/Title";
 import { assets } from "../assets/assets";
-import Newsletter from "../components/Newsletter";  // ← Fixed capitalization
+import Newsletter from "../components/Newsletter";
 
 const About = () => {
   return (
