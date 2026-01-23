@@ -1,7 +1,7 @@
 import React from "react";
 import Title from "../components/Title";
 import { assets } from "../assets/assets";
-import Newsletter from "../components/Newsletter";
+import Newsletter from "../components/Newsletter";  // ← Fixed capitalization
 
 const About = () => {
   return (
@@ -27,8 +27,7 @@ const About = () => {
           </p>
           <b className="text-gray-800 text-xl">Our Mission:</b>
           <p className="text-gray-600">
-            To be the go-to destination for quality footwear at affordable
-            prices.
+            To be the go-to destination for quality footwear at affordable prices.
           </p>
         </div>
       </div>
@@ -59,7 +58,7 @@ const About = () => {
         </div>
       </div>
 
-      <NewsLetter />
+      <Newsletter />
     </div>
   );
 };
