@@ -1,11 +1,10 @@
+// backend/index.js
 require("dotenv").config();
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
 const path = require("path");
 const db = require("./config/connection");
 const adminRoute = require("./routes/adminRoute");
@@ -14,13 +13,18 @@ const productRoute = require("./routes/productRoute");
 const cartRoute = require("./routes/cartRoute");
 const orderRoute = require("./routes/orderRoute");
 const expressSession = require("express-session");
-const flash = require("connect-flash")
+const flash = require("connect-flash");
 const connectCloudinary = require("./config/cloudinary");
 connectCloudinary();
 
+// CORS Configuration - UPDATED
 const allowedOrigins = [
+    // Development
+    "http://localhost:5173",
     "http://localhost:5174",
-    "http://localhost:5173"
+    // Production
+    process.env.FRONTEND_URL,
+    process.env.ADMIN_URL
 ].filter(Boolean);
 
 // Middlewares
@@ -33,6 +37,7 @@ app.use(cors({
         if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
+            console.log('Blocked origin:', origin);
             callback(new Error('Not allowed by CORS'));
         }
     },
@@ -48,18 +53,18 @@ app.use(
         saveUninitialized: false,
         secret: process.env.EXPRESS_SESSION_SECRET
     })
-)
+);
 app.use(flash());
 app.use(express.static(path.join(__dirname, "public")));
-app.set("view engine", "ejs")
+app.set("view engine", "ejs");
 
 // Routes
-app.use("/admin", adminRoute)
-app.use("/users", userRoute)
-app.use("/products", productRoute)
-app.use("/cart", cartRoute)
-app.use("/orders", orderRoute)
+app.use("/admin", adminRoute);
+app.use("/users", userRoute);
+app.use("/products", productRoute);
+app.use("/cart", cartRoute);
+app.use("/orders", orderRoute);
 
 app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port} ✅`)
-})
+    console.log(`Server is running on http://localhost:${port} ✅`);
+});
