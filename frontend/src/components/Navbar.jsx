@@ -79,7 +79,9 @@ const Navbar = () => {
             {({ isActive }) => (
               <>
                 <p>HOME</p>
-                <hr className={`w-2/4 border-none h-[1.5px] bg-gray-800 ${isActive ? '' : 'hidden'}`} />
+                <hr
+                  className={`w-2/4 border-none h-[1.5px] bg-gray-800 ${isActive ? "" : "hidden"}`}
+                />
               </>
             )}
           </NavLink>
@@ -90,7 +92,9 @@ const Navbar = () => {
             {({ isActive }) => (
               <>
                 <p>COLLECTIONS</p>
-                <hr className={`w-2/4 border-none h-[1.5px] bg-gray-800 ${isActive ? '' : 'hidden'}`} />
+                <hr
+                  className={`w-2/4 border-none h-[1.5px] bg-gray-800 ${isActive ? "" : "hidden"}`}
+                />
               </>
             )}
           </NavLink>
@@ -98,7 +102,9 @@ const Navbar = () => {
             {({ isActive }) => (
               <>
                 <p>ABOUT</p>
-                <hr className={`w-2/4 border-none h-[1.5px] bg-gray-800 ${isActive ? '' : 'hidden'}`} />
+                <hr
+                  className={`w-2/4 border-none h-[1.5px] bg-gray-800 ${isActive ? "" : "hidden"}`}
+                />
               </>
             )}
           </NavLink>
@@ -106,7 +112,9 @@ const Navbar = () => {
             {({ isActive }) => (
               <>
                 <p>CONTACT</p>
-                <hr className={`w-2/4 border-none h-[1.5px] bg-gray-800 ${isActive ? '' : 'hidden'}`} />
+                <hr
+                  className={`w-2/4 border-none h-[1.5px] bg-gray-800 ${isActive ? "" : "hidden"}`}
+                />
               </>
             )}
           </NavLink>
@@ -185,6 +193,17 @@ const Navbar = () => {
               </p>
             )}
           </Link>
+
+          {/* Admin Panel Button - Available for all users */}
+          <a
+            href="http://localhost:5174"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden sm:block bg-black text-white px-4 py-2 rounded-md text-xs font-medium hover:scale-105 transition-smooth duration-300 ease-in-out"
+          >
+            Admin Panel
+          </a>
+
           <img
             onClick={() => setVisible(true)}
             src={assets.menu_icon}
@@ -216,9 +235,9 @@ const Navbar = () => {
               <nav className="py-4">
                 <NavLink
                   onClick={() => setVisible(false)}
-                  className={({ isActive }) => 
+                  className={({ isActive }) =>
                     `flex items-center justify-between py-4 px-6 text-base hover:bg-gray-50 transition-colors ${
-                      isActive ? 'font-semibold text-gray-900' : 'text-gray-800'
+                      isActive ? "font-semibold text-gray-900" : "text-gray-800"
                     }`
                   }
                   to="/"
@@ -228,9 +247,9 @@ const Navbar = () => {
                 </NavLink>
                 <NavLink
                   onClick={() => setVisible(false)}
-                  className={({ isActive }) => 
+                  className={({ isActive }) =>
                     `flex items-center justify-between py-4 px-6 text-base hover:bg-gray-50 transition-colors ${
-                      isActive ? 'font-semibold text-gray-900' : 'text-gray-800'
+                      isActive ? "font-semibold text-gray-900" : "text-gray-800"
                     }`
                   }
                   to="/collections"
@@ -240,9 +259,9 @@ const Navbar = () => {
                 </NavLink>
                 <NavLink
                   onClick={() => setVisible(false)}
-                  className={({ isActive }) => 
+                  className={({ isActive }) =>
                     `flex items-center justify-between py-4 px-6 text-base hover:bg-gray-50 transition-colors ${
-                      isActive ? 'font-semibold text-gray-900' : 'text-gray-800'
+                      isActive ? "font-semibold text-gray-900" : "text-gray-800"
                     }`
                   }
                   to="/about"
@@ -252,9 +271,9 @@ const Navbar = () => {
                 </NavLink>
                 <NavLink
                   onClick={() => setVisible(false)}
-                  className={({ isActive }) => 
+                  className={({ isActive }) =>
                     `flex items-center justify-between py-4 px-6 text-base hover:bg-gray-50 transition-colors ${
-                      isActive ? 'font-semibold text-gray-900' : 'text-gray-800'
+                      isActive ? "font-semibold text-gray-900" : "text-gray-800"
                     }`
                   }
                   to="/contact"
@@ -266,9 +285,11 @@ const Navbar = () => {
                 {token && user && (
                   <NavLink
                     onClick={() => setVisible(false)}
-                    className={({ isActive }) => 
+                    className={({ isActive }) =>
                       `flex items-center justify-between py-4 px-6 text-base hover:bg-gray-50 transition-colors ${
-                        isActive ? 'font-semibold text-gray-900' : 'text-gray-800'
+                        isActive
+                          ? "font-semibold text-gray-900"
+                          : "text-gray-800"
                       }`
                     }
                     to="/orders"
@@ -277,6 +298,18 @@ const Navbar = () => {
                     <span className="text-gray-400">›</span>
                   </NavLink>
                 )}
+
+                {/* Admin Panel Link - Available for all users */}
+                <a
+                  href="http://localhost:5174"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setVisible(false)}
+                  className="flex items-center justify-between py-4 px-6 text-base hover:bg-gray-50 transition-colors text-gray-800"
+                >
+                  <span>ADMIN PANEL</span>
+                  <span className="text-gray-400">›</span>
+                </a>
               </nav>
 
               <div className="border-t border-gray-200 mt-4">
@@ -295,8 +328,11 @@ const Navbar = () => {
                 ) : (
                   <div className="py-6 px-6 space-y-3">
                     <p className="text-sm text-gray-700 mb-4">
-                      Become a Member for the best products, inspiration and stories in sport.{" "}
-                      <span className="underline cursor-pointer">Learn more</span>
+                      Become a Member for the best products, inspiration and
+                      stories in sport.{" "}
+                      <span className="underline cursor-pointer">
+                        Learn more
+                      </span>
                     </p>
                     <button
                       onClick={() => {
