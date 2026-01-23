@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { assets } from "../assets/assets";
-import { Link, NavLink, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, NavLink, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
 import AuthDialog from "./ui/authDialog";
 
@@ -15,6 +15,12 @@ const Navbar = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const authDialogOpen = searchParams.get("auth") === "true";
+
+  const location = useLocation();
+
+  const isCollectionsPage =
+    location.pathname === "/collections" ||
+    location.pathname.startsWith("/collections/");
 
   const setAuthDialogOpen = (open) => {
     if (open) setSearchParams({ auth: "true" });
@@ -85,9 +91,8 @@ const Navbar = () => {
                       : path.replace("/", "").toUpperCase()}
                   </p>
                   <hr
-                    className={`w-2/4 h-[1.5px] bg-gray-800 border-none ${
-                      isActive ? "" : "hidden"
-                    }`}
+                    className={`w-2/4 h-[1.5px] bg-gray-800 border-none ${isActive ? "" : "hidden"
+                      }`}
                   />
                 </>
               )}
@@ -97,13 +102,14 @@ const Navbar = () => {
 
         {/* RIGHT ICONS */}
         <div className="flex items-center gap-4 sm:gap-6">
-          <img
-            src={assets.search_icon}
-            className="w-5 cursor-pointer"
-            alt="Search"
-            onClick={() => setShowSearch(true)}
-          />
-
+          {isCollectionsPage && (
+            <img
+              src={assets.search_icon}
+              className="w-5 cursor-pointer"
+              alt="Search"
+              onClick={() => setShowSearch(true)}
+            />
+          )}
           {/* PROFILE DROPDOWN */}
           <div className="group relative hidden sm:block">
             <img
