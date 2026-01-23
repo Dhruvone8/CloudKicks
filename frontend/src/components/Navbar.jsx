@@ -129,7 +129,7 @@ const Navbar = () => {
                   </>
                 ) : (
                   <button onClick={() => setAuthDialogOpen(true)}>
-                    Login / Register
+                    <p className="cursor-pointer">Login / Register</p>
                   </button>
                 )}
               </div>
