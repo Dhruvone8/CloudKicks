@@ -102,7 +102,7 @@ const Orders = ({ token }) => {
                 justify-between md:items-end 
                 gap-3 md:min-w-[120px]"
             >
-              <p className="font-semibold">${order.amount}</p>
+              <p className="font-semibold">₹{order.amount}</p>
 
               <select
                 onChange={(e) => statusHandler(e, order._id)}
