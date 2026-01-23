@@ -76,23 +76,39 @@ const Navbar = () => {
         />
         <ul className="hidden sm:flex gap-5 text-sm text-gray-800">
           <NavLink to="/" className="flex flex-col items-center gap-1">
-            <p>HOME</p>
-            <hr className="w-2/4 border-none h-[1.5px] bg-gray-800 hidden" />
+            {({ isActive }) => (
+              <>
+                <p>HOME</p>
+                <hr className={`w-2/4 border-none h-[1.5px] bg-gray-800 ${isActive ? '' : 'hidden'}`} />
+              </>
+            )}
           </NavLink>
           <NavLink
             to="/collections"
             className="flex flex-col items-center gap-1"
           >
-            <p>COLLECTIONS</p>
-            <hr className="w-2/4 border-none h-[1.5px] bg-gray-800 hidden" />
+            {({ isActive }) => (
+              <>
+                <p>COLLECTIONS</p>
+                <hr className={`w-2/4 border-none h-[1.5px] bg-gray-800 ${isActive ? '' : 'hidden'}`} />
+              </>
+            )}
           </NavLink>
           <NavLink to="/about" className="flex flex-col items-center gap-1">
-            <p>ABOUT</p>
-            <hr className="w-2/4 border-none h-[1.5px] bg-gray-800 hidden" />
+            {({ isActive }) => (
+              <>
+                <p>ABOUT</p>
+                <hr className={`w-2/4 border-none h-[1.5px] bg-gray-800 ${isActive ? '' : 'hidden'}`} />
+              </>
+            )}
           </NavLink>
           <NavLink to="/contact" className="flex flex-col items-center gap-1">
-            <p>CONTACT</p>
-            <hr className="w-2/4 border-none h-[1.5px] bg-gray-800 hidden" />
+            {({ isActive }) => (
+              <>
+                <p>CONTACT</p>
+                <hr className={`w-2/4 border-none h-[1.5px] bg-gray-800 ${isActive ? '' : 'hidden'}`} />
+              </>
+            )}
           </NavLink>
         </ul>
 
@@ -183,73 +199,127 @@ const Navbar = () => {
             visible ? "w-full" : "w-0"
           }`}
         >
-          <div className="flex flex-col text-gray-800">
+          <div className="flex flex-col text-gray-800 h-full">
             <div
               onClick={() => setVisible(false)}
-              className="flex items-center gap-4 p-3 ml-auto cursor-pointer"
+              className="flex items-center justify-between p-5 border-b border-gray-200"
             >
-              <img className="h-4 rotate-180" src={assets.cross_icon} alt="" />
+              <img
+                src={assets.logo}
+                className="w-16 h-10 object-contain"
+                alt="CloudKicks Logo"
+              />
+              <img className="h-5" src={assets.cross_icon} alt="Close" />
             </div>
 
-            <NavLink
-              onClick={() => setVisible(false)}
-              className="py-3 pl-6 border-b border-gray-300"
-              to="/"
-            >
-              HOME
-            </NavLink>
-            <NavLink
-              onClick={() => setVisible(false)}
-              className="py-3 pl-6 border-b border-gray-300"
-              to="/collections"
-            >
-              COLLECTIONS
-            </NavLink>
-            <NavLink
-              onClick={() => setVisible(false)}
-              className="py-3 pl-6 border-b border-gray-300"
-              to="/about"
-            >
-              ABOUT
-            </NavLink>
-            <NavLink
-              onClick={() => setVisible(false)}
-              className="py-3 pl-6 border-b border-gray-300"
-              to="/contact"
-            >
-              CONTACT
-            </NavLink>
-
-            {token && user ? (
-              <>
-                <div className="py-3 pl-6 border-b border-gray-300 text-gray-900 font-medium">
-                  Hello, {user.name || user.email?.split("@")[0] || "User"}
-                </div>
+            <div className="flex-1 overflow-y-auto">
+              <nav className="py-4">
                 <NavLink
                   onClick={() => setVisible(false)}
-                  className="py-3 pl-6 border-b border-gray-300"
-                  to="/orders"
+                  className={({ isActive }) => 
+                    `flex items-center justify-between py-4 px-6 text-base hover:bg-gray-50 transition-colors ${
+                      isActive ? 'font-semibold text-gray-900' : 'text-gray-800'
+                    }`
+                  }
+                  to="/"
                 >
-                  MY ORDERS
+                  <span>HOME</span>
+                  <span className="text-gray-400">›</span>
                 </NavLink>
-                <button
-                  onClick={handleLogout}
-                  className="py-3 pl-6 border-b border-gray-300 text-left text-red-600 font-medium"
+                <NavLink
+                  onClick={() => setVisible(false)}
+                  className={({ isActive }) => 
+                    `flex items-center justify-between py-4 px-6 text-base hover:bg-gray-50 transition-colors ${
+                      isActive ? 'font-semibold text-gray-900' : 'text-gray-800'
+                    }`
+                  }
+                  to="/collections"
                 >
-                  LOGOUT
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => {
-                  setVisible(false);
-                  setAuthDialogOpen(true);
-                }}
-                className="py-3 pl-6 border-b border-gray-300 text-left font-medium"
-              >
-                LOGIN/REGISTER
-              </button>
-            )}
+                  <span>COLLECTIONS</span>
+                  <span className="text-gray-400">›</span>
+                </NavLink>
+                <NavLink
+                  onClick={() => setVisible(false)}
+                  className={({ isActive }) => 
+                    `flex items-center justify-between py-4 px-6 text-base hover:bg-gray-50 transition-colors ${
+                      isActive ? 'font-semibold text-gray-900' : 'text-gray-800'
+                    }`
+                  }
+                  to="/about"
+                >
+                  <span>ABOUT</span>
+                  <span className="text-gray-400">›</span>
+                </NavLink>
+                <NavLink
+                  onClick={() => setVisible(false)}
+                  className={({ isActive }) => 
+                    `flex items-center justify-between py-4 px-6 text-base hover:bg-gray-50 transition-colors ${
+                      isActive ? 'font-semibold text-gray-900' : 'text-gray-800'
+                    }`
+                  }
+                  to="/contact"
+                >
+                  <span>CONTACT</span>
+                  <span className="text-gray-400">›</span>
+                </NavLink>
+
+                {token && user && (
+                  <NavLink
+                    onClick={() => setVisible(false)}
+                    className={({ isActive }) => 
+                      `flex items-center justify-between py-4 px-6 text-base hover:bg-gray-50 transition-colors ${
+                        isActive ? 'font-semibold text-gray-900' : 'text-gray-800'
+                      }`
+                    }
+                    to="/orders"
+                  >
+                    <span>MY ORDERS</span>
+                    <span className="text-gray-400">›</span>
+                  </NavLink>
+                )}
+              </nav>
+
+              <div className="border-t border-gray-200 mt-4">
+                {token && user ? (
+                  <div className="py-6 px-6">
+                    <p className="text-sm text-gray-500 mb-4">
+                      Hello, {user.name || user.email?.split("@")[0] || "User"}
+                    </p>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full bg-black text-white py-3 px-6 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
+                    >
+                      LOGOUT
+                    </button>
+                  </div>
+                ) : (
+                  <div className="py-6 px-6 space-y-3">
+                    <p className="text-sm text-gray-700 mb-4">
+                      Become a Member for the best products, inspiration and stories in sport.{" "}
+                      <span className="underline cursor-pointer">Learn more</span>
+                    </p>
+                    <button
+                      onClick={() => {
+                        setVisible(false);
+                        setAuthDialogOpen(true);
+                      }}
+                      className="w-full bg-black text-white py-3 px-6 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
+                    >
+                      JOIN US
+                    </button>
+                    <button
+                      onClick={() => {
+                        setVisible(false);
+                        setAuthDialogOpen(true);
+                      }}
+                      className="w-full border border-gray-300 text-gray-800 py-3 px-6 rounded-full text-sm font-medium hover:border-gray-400 transition-colors"
+                    >
+                      SIGN IN
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
