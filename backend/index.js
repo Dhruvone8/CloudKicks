@@ -65,6 +65,13 @@ app.use("/products", productRoute);
 app.use("/cart", cartRoute);
 app.use("/orders", orderRoute);
 
+app.get("/", (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "CloudKicks Backend is running 🚀"
+    });
+});
+
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port} ✅`);
 });
