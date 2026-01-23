@@ -64,8 +64,9 @@ async function handleUserRegistration(req, res) {
         res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+            sameSite: "none",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+
         });
 
         return res.status(201).json({
@@ -109,7 +110,7 @@ async function handleLogin(req, res) {
 
         // Verify password
         const isPasswordCorrect = await bcrypt.compare(password, user.password);
-        
+
         if (!isPasswordCorrect) {
             return res.status(401).json({
                 success: false,
@@ -127,8 +128,8 @@ async function handleLogin(req, res) {
         res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+            sameSite: "none", // Required for cross-origin cookies
+            maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
         // Send response to frontend
@@ -158,9 +159,10 @@ async function handleLogout(req, res) {
     res.clearCookie("token", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax"
+        sameSite: "none", // Required for cross-origin cookies
+        maxAge: 0
     });
-    
+
     return res.status(200).json({
         success: true,
         message: "Logged out successfully"
