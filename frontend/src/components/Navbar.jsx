@@ -61,7 +61,6 @@ const Navbar = () => {
 
   return (
     <>
-      {/* ✅ Z-INDEX FIXED NAVBAR */}
       <div className="relative z-50 flex items-center justify-between py-5 font-medium bg-white">
         <img
           src={assets.logo}
@@ -73,7 +72,11 @@ const Navbar = () => {
         {/* DESKTOP LINKS */}
         <ul className="hidden sm:flex gap-5 text-sm text-gray-800">
           {["/", "/collections", "/about", "/contact"].map((path, i) => (
-            <NavLink key={i} to={path} className="flex flex-col items-center gap-1">
+            <NavLink
+              key={i}
+              to={path}
+              className="flex flex-col items-center gap-1"
+            >
               {({ isActive }) => (
                 <>
                   <p>
@@ -142,10 +145,8 @@ const Navbar = () => {
               </span>
             )}
           </Link>
-
-          {/* ✅ ADMIN PANEL BUTTON (CLICKABLE NOW) */}
           <a
-            href={import.meta.env.VITE_ADMIN_URL}
+            href={`${import.meta.env.VITE_ADMIN_URL}`}
             target="_blank"
             rel="noopener noreferrer"
             className="hidden sm:block z-50 bg-black text-white px-4 py-2 rounded-md text-xs font-medium hover:scale-105 transition-all"
