@@ -46,11 +46,11 @@ const Cart = () => {
       if (data.success) {
         // Filter out items with missing products
         const validCartItems = data.cartData.filter(item => item.product);
-        
+
         if (validCartItems.length < data.cartData.length) {
           toast.info("Some products are no longer available and were removed from cart");
         }
-        
+
         setCartData(validCartItems);
       } else {
         toast.error("Failed to load cart");
@@ -66,6 +66,11 @@ const Cart = () => {
   // Update item quantity
   const updateQuantity = async (productId, size, newQuantity) => {
     const updateKey = `${productId}-${size}`;
+
+    if (updating[updateKey]) {
+      return;
+    }
+
     setUpdating((prev) => ({ ...prev, [updateKey]: true }));
 
     try {
@@ -88,16 +93,21 @@ const Cart = () => {
         // Filter out items with missing products
         const validCartItems = data.cartData.filter(item => item.product);
         setCartData(validCartItems);
-        
+
         if (newQuantity === 0) {
           toast.success("Item removed from cart");
         }
       } else {
-        toast.error(data.message || "Failed to update cart");
+        // Only show error toast if it's not a "not found" error during deletion
+        if (!(newQuantity === 0 && data.message?.includes("not found"))) {
+          toast.error(data.message || "Failed to update cart");
+        }
       }
     } catch (error) {
       console.error("Error updating cart:", error);
-      toast.error("Failed to update quantity");
+      if (newQuantity !== 0) {
+        toast.error("Failed to update quantity");
+      }
     } finally {
       setUpdating((prev) => ({ ...prev, [updateKey]: false }));
     }

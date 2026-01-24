@@ -1,5 +1,5 @@
-import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import Collections from "./pages/Collections";
 import About from "./pages/About";
@@ -13,6 +13,17 @@ import Footer from "./components/Footer";
 import SearchBar from "./components/SearchBar";
 import Verify from "./pages/Verify";  
 import { Toaster as SonnerToaster } from "sonner";
+
+// Scroll to top component
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
 
 const App = () => {
   return (
@@ -30,6 +41,7 @@ const App = () => {
           }
         }}
       />
+      <ScrollToTop />
       <Navbar />
       <SearchBar />
       <Routes>
@@ -38,7 +50,6 @@ const App = () => {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/product/:productId" element={<Product />} />
-        {/* Redirect /login to home - auth dialog will handle login */}
         <Route path="/login" element={<Navigate to="/" replace />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />

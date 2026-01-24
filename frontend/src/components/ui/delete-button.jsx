@@ -1,9 +1,12 @@
+// frontend/src/components/ui/delete-button.jsx
+// Update the handleClick function and add a ref to prevent multiple calls:
+
 "use client";
 
 import { Undo03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { motion, AnimatePresence } from "motion/react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 const DARK_BLUE = "#0B1C2D";
 
@@ -11,6 +14,7 @@ const DeleteButton = ({ id, onConfirm }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [count, setCount] = useState(3);
   const [isAnimating, setIsAnimating] = useState(false);
+  const hasConfirmedRef = useRef(false);
 
   useEffect(() => {
     if (!isDeleting || count === 0) return;
@@ -19,7 +23,8 @@ const DeleteButton = ({ id, onConfirm }) => {
   }, [isDeleting, count]);
 
   useEffect(() => {
-    if (isDeleting && count === 0) {
+    if (isDeleting && count === 0 && !hasConfirmedRef.current) {
+      hasConfirmedRef.current = true;
       const timeout = setTimeout(() => {
         if (onConfirm) onConfirm();
       }, 350);
@@ -31,24 +36,23 @@ const DeleteButton = ({ id, onConfirm }) => {
     if (isAnimating) return;
     setIsAnimating(true);
     setIsDeleting(state);
-    if (state) setCount(3);
+    if (state) {
+      setCount(3);
+      hasConfirmedRef.current = false; // Reset on new deletion attempt
+    }
     setTimeout(() => setIsAnimating(false), 400);
   };
 
   return (
-    // Fixed height (h-10) matches the buttons exactly.
-    // 'relative' ensures the popLayout positioning is contained here.
     <div className="relative h-10 w-full flex items-center justify-center">
       <AnimatePresence mode="popLayout" initial={false}>
         {!isDeleting ? (
-          /* DELETE STATE (Text Version) */
           <motion.button
             key="delete"
             layoutId={`deleteButton-${id}`}
             onClick={() => handleClick(true)}
             whileTap={{ scale: 0.95 }}
             style={{ pointerEvents: isAnimating ? "none" : "auto" }}
-            // Removed 'absolute' - popLayout handles the overlap automatically
             className="cursor-pointer text-white px-5 h-11 rounded-full flex items-center justify-center overflow-hidden border border-[#0B1C2D] shadow-sm bg-[#0B1C2D] z-10"
             initial={{ opacity: 0, scale: 0.9 }} 
             animate={{ opacity: 1, scale: 1 }}
@@ -62,7 +66,7 @@ const DeleteButton = ({ id, onConfirm }) => {
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: -20, opacity: 0 }}
-                  transition={{ duration: 0.2, delay: i * 0.015 }} // Sped up text slightly
+                  transition={{ duration: 0.2, delay: i * 0.015 }}
                   style={{ display: "inline-block", minWidth: char === " " ? "4px" : "auto" }}
                 >
                   {char}
@@ -71,14 +75,12 @@ const DeleteButton = ({ id, onConfirm }) => {
             </motion.span>
           </motion.button>
         ) : (
-          /* CANCEL STATE */
           <motion.button
             key="cancel"
             layoutId={`deleteButton-${id}`}
             onClick={() => handleClick(false)}
             whileTap={{ scale: 0.95 }}
             style={{ pointerEvents: isAnimating ? "none" : "auto" }}
-            // Removed 'absolute' here too - this fixes the blink on cancel
             className="cursor-pointer px-3 h-10 rounded-full flex items-center gap-2 overflow-hidden bg-white border border-[#0B1C2D] shadow-sm z-20"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
