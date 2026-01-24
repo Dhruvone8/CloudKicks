@@ -187,14 +187,30 @@ const Orders = ({ token }) => {
                 onChange={(e) => statusHandler(e, order._id)}
                 className="border border-gray-300 px-3 py-2 text-sm w-full md:w-auto rounded-md cursor-pointer"
                 value={order.status}
+                disabled={!order.isPaid}
               >
-                <option value="Pending Payment">Pending Payment</option>
-                <option value="Order Placed">Order Placed</option>
-                <option value="Packing">Packing</option>
-                <option value="Shipped">Shipped</option>
-                <option value="Out for delivery">Out for delivery</option>
-                <option value="Delivered">Delivered</option>
+                {!order.isPaid && (
+                  <option value="Pending Payment" disabled>
+                    Pending Payment (Payment Required)
+                  </option>
+                )}
+                
+                {order.isPaid && (
+                  <>
+                    <option value="Order Placed">Order Placed</option>
+                    <option value="Packing">Packing</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Out for delivery">Out for delivery</option>
+                    <option value="Delivered">Delivered</option>
+                  </>
+                )}
               </select>
+              
+              {!order.isPaid && (
+                <p className="text-xs text-orange-600 mt-1">
+                  ⚠️ Awaiting payment confirmation
+                </p>
+              )}
             </div>
           </div>
         ))}

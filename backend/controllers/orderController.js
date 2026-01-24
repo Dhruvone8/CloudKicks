@@ -8,7 +8,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Constants
 const DELIVERY_CHARGE = 7;
-const ALLOWED_ORDER_STATUSES = ["Pending Payment", "Order Placed", "Packing", "Shipped", "Out for delivery", "Delivered"];
+const ALLOWED_ORDER_STATUSES = [
+    "Order Placed",
+    "Packing",
+    "Shipped",
+    "Out for delivery",
+    "Delivered"
+];
 
 // Helper function to validate and prepare order items
 const validateAndPrepareOrderItems = async (items) => {
@@ -364,6 +370,19 @@ const handleUpdateOrderStatus = async (req, res) => {
             return res.status(404).json({
                 success: false,
                 message: "Order not found"
+            });
+        }
+
+        if (!order.isPaid) {
+            return res.status(403).json({
+                success: false,
+                message: "Cannot update status. Payment not confirmed."
+            });
+        }
+        if (order.status === "Delivered") {
+            return res.status(403).json({
+                success: false,
+                message: "Cannot change status of delivered orders"
             });
         }
 
