@@ -6,16 +6,25 @@ import { toast } from "sonner";
 
 const Orders = ({ token }) => {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchAllOrders = async () => {
     if (!token) return;
 
-    const res = await axios.get(`${backendUrl}/orders/allOrders`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    try {
+      setLoading(true);
+      const res = await axios.get(`${backendUrl}/orders/allOrders`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    if (res.data.success) {
-      setOrders(res.data.orders);
+      if (res.data.success) {
+        setOrders(res.data.orders);
+      }
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      toast.error("Failed to fetch orders");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -34,21 +43,60 @@ const Orders = ({ token }) => {
 
       if (response.data.success) {
         toast.success("Status updated successfully");
-        fetchAllOrders();
+        await fetchAllOrders();
       }
     } catch (err) {
-      toast.error("Something went wrong");
+      toast.error(err.response?.data?.message || "Something went wrong");
       console.log(err);
     }
   };
 
   useEffect(() => {
     fetchAllOrders();
+    
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(() => {
+      if (token) {
+        fetchAllOrders();
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, [token]);
+
+  if (loading) {
+    return (
+      <div className="w-full text-black">
+        <h2 className="text-lg font-semibold mb-6">Order Page</h2>
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (orders.length === 0) {
+    return (
+      <div className="w-full text-black">
+        <h2 className="text-lg font-semibold mb-6">Order Page</h2>
+        <div className="text-center py-16 border border-gray-200 rounded">
+          <p className="text-gray-600">No orders found</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full text-black">
-      <h2 className="text-lg font-semibold mb-6">Order Page</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-lg font-semibold">Order Page</h2>
+        <button
+          onClick={fetchAllOrders}
+          className="bg-black text-white px-4 py-2 rounded-md text-sm hover:scale-105 transition-all"
+        >
+          Refresh
+        </button>
+      </div>
 
       <div className="space-y-6">
         {orders.map((order) => (
@@ -56,7 +104,7 @@ const Orders = ({ token }) => {
             key={order._id}
             className="border border-gray-200 p-4 md:p-6 
              flex flex-col md:flex-row 
-             gap-4 md:gap-6"
+             gap-4 md:gap-6 bg-white rounded-lg"
           >
             {/* ICON */}
             <img
@@ -69,31 +117,62 @@ const Orders = ({ token }) => {
             <div className="flex-1 space-y-2 text-sm">
               {/* ITEMS */}
               <div className="space-y-1">
-                {order.items.map((item, index) => (
-                  <p key={index}>
-                    {item.product?.name} × {item.quantity} {item.size}
-                  </p>
-                ))}
+                {order.items.map((item, index) => {
+                  if (!item.product) {
+                    return (
+                      <p key={index} className="text-red-500">
+                        Product unavailable × {item.quantity} {item.size}
+                      </p>
+                    );
+                  }
+                  return (
+                    <p key={index}>
+                      {item.product.name} × {item.quantity} {item.size}
+                    </p>
+                  );
+                })}
               </div>
 
-              {/* SHOP / ADDRESS */}
-              <div className="pt-2">
-                <p className="font-medium">Great Stack</p>
-                <p>Main Street,</p>
-                <p>
-                  {order.address?.city}, {order.address?.state},{" "}
-                  {order.address?.country}, {order.address?.zip}
+              {/* USER INFO */}
+              <div className="pt-2 border-t">
+                <p className="font-medium text-gray-900">
+                  {order.userId?.name || "Unknown User"}
                 </p>
-                <p>{order.address?.phone}</p>
+                <p className="text-gray-600">
+                  {order.userId?.email || "No email"}
+                </p>
+              </div>
+
+              {/* ADDRESS */}
+              <div className="pt-2">
+                <p className="font-medium">Delivery Address:</p>
+                <p>{order.address?.street || "N/A"}</p>
+                <p>
+                  {order.address?.city || ""}, {order.address?.state || ""},{" "}
+                  {order.address?.country || ""}, {order.address?.zip || order.address?.zipcode || ""}
+                </p>
+                <p>{order.address?.phone || "No phone"}</p>
               </div>
             </div>
 
             {/* ORDER META */}
             <div className="text-sm space-y-1 md:min-w-[160px]">
-              <p>Items : {order.items.length}</p>
-              <p>Method : {order.paymentMethod}</p>
-              <p>Payment : {order.isPaid ? "Paid" : "Pending"}</p>
-              <p>Date : {new Date(order.createdAt).toLocaleDateString()}</p>
+              <p>
+                <span className="font-medium">Items:</span> {order.items.length}
+              </p>
+              <p>
+                <span className="font-medium">Method:</span> {order.paymentMethod}
+              </p>
+              <p>
+                <span className="font-medium">Payment:</span>{" "}
+                <span className={order.isPaid ? "text-green-600" : "text-orange-600"}>
+                  {order.isPaid ? "Paid" : "Pending"}
+                </span>
+              </p>
+              <p>
+                <span className="font-medium">Date:</span>{" "}
+                {new Date(order.createdAt).toLocaleDateString()}
+              </p>
             </div>
 
             {/* PRICE + STATUS */}
@@ -102,15 +181,17 @@ const Orders = ({ token }) => {
                 justify-between md:items-end 
                 gap-3 md:min-w-[120px]"
             >
-              <p className="font-semibold">₹{order.amount}</p>
+              <p className="font-semibold text-lg">₹{order.amount}</p>
 
               <select
                 onChange={(e) => statusHandler(e, order._id)}
-                className="border border-gray-300 px-3 py-1 text-sm w-full md:w-auto"
+                className="border border-gray-300 px-3 py-2 text-sm w-full md:w-auto rounded-md cursor-pointer"
                 value={order.status}
               >
+                <option value="Pending Payment">Pending Payment</option>
                 <option value="Order Placed">Order Placed</option>
                 <option value="Packing">Packing</option>
+                <option value="Shipped">Shipped</option>
                 <option value="Out for delivery">Out for delivery</option>
                 <option value="Delivered">Delivered</option>
               </select>

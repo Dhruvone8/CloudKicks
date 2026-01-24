@@ -11,10 +11,9 @@ const RelatedProducts = ({ category, subcategory, currentProductId }) => {
     if (products.length > 0) {
       let productsCopy = products.slice();
 
-      // Filter by category and subcategory
+      // Filter by category
       productsCopy = productsCopy.filter((item) => category === item.category);
       
-      // Fix: Check for both subcategory and subCategory
       productsCopy = productsCopy.filter(
         (item) => subcategory === item.subCategory || subcategory === item.subcategory
       );

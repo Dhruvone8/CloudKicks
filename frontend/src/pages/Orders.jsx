@@ -7,13 +7,18 @@ const Orders = () => {
   const { currency, backendUrl, token } = useContext(ShopContext);
   const [orderData, setOrderData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Fetch user orders from backend
-  const loadOrderData = async () => {
+  const loadOrderData = async (showRefreshToast = false) => {
     try {
       if (!token) {
         setLoading(false);
         return null;
+      }
+
+      if (showRefreshToast) {
+        setRefreshing(true);
       }
 
       const response = await fetch(`${backendUrl}/orders/userOrders`, {
@@ -21,7 +26,7 @@ const Orders = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // Important: sends cookies with request
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -44,7 +49,11 @@ const Orders = () => {
           });
         });
 
-        setOrderData(allOrdersItems.reverse()); // Show newest first
+        setOrderData(allOrdersItems.reverse());
+        
+        if (showRefreshToast) {
+          toast.success("Orders refreshed");
+        }
       } else {
         toast.error(data.message || "Failed to load orders");
       }
@@ -53,11 +62,21 @@ const Orders = () => {
       toast.error("Failed to load orders");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
   useEffect(() => {
     loadOrderData();
+    
+    // Auto-refresh every 30 seconds to sync status
+    const interval = setInterval(() => {
+      if (token) {
+        loadOrderData(false);
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, [token]);
 
   // Helper function to format date
@@ -69,12 +88,16 @@ const Orders = () => {
   // Helper function to get status color
   const getStatusColor = (status) => {
     switch (status) {
+      case "Pending Payment":
+        return "bg-orange-500";
       case "Order Placed":
         return "bg-blue-500";
-      case "Processing":
+      case "Packing":
         return "bg-yellow-500";
       case "Shipped":
         return "bg-purple-500";
+      case "Out for delivery":
+        return "bg-indigo-500";
       case "Delivered":
         return "bg-green-500";
       case "Cancelled":
@@ -137,8 +160,17 @@ const Orders = () => {
 
   return (
     <div className="border-t pt-16">
-      <div className="text-2xl mb-8">
-        <Title text1={"MY"} text2={"ORDERS"} />
+      <div className="flex justify-between items-center mb-8">
+        <div className="text-2xl">
+          <Title text1={"MY"} text2={"ORDERS"} />
+        </div>
+        <button
+          onClick={() => loadOrderData(true)}
+          disabled={refreshing}
+          className="bg-black text-white px-4 py-2 rounded-md text-sm hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {refreshing ? "Refreshing..." : "Refresh"}
+        </button>
       </div>
       <div>
         {orderData.map((item, index) => {
@@ -153,6 +185,9 @@ const Orders = () => {
                   src={item.product?.images?.[0]?.url || "/placeholder.png"}
                   alt={item.product?.name || "Product"}
                   className="w-16 sm:w-20 object-cover rounded"
+                  onError={(e) => {
+                    e.target.src = "/placeholder.png";
+                  }}
                 />
                 <div>
                   <p className="font-medium text-base">
@@ -181,15 +216,16 @@ const Orders = () => {
                       item.status,
                     )}`}
                   ></p>
-                  <p className="text-sm md:text-base">{item.status}</p>
+                  <p className="text-sm md:text-base font-medium">{item.status}</p>
                 </div>
                 <button
-                  onClick={() => loadOrderData()} // Refresh to check status
+                  onClick={() => loadOrderData(true)}
+                  disabled={refreshing}
                   className="bg-black text-white py-2 px-5 rounded-md text-sm
                     cursor-pointer hover:scale-105 transition-all duration-300 
-                    w-36 sm:w-auto shadow-md"
+                    w-36 sm:w-auto shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Track Order
+                  {refreshing ? "Updating..." : "Track Order"}
                 </button>
               </div>
             </div>

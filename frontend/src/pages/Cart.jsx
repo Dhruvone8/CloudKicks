@@ -15,7 +15,6 @@ const Cart = () => {
   const [updating, setUpdating] = useState({});
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Check if auth dialog should be open based on URL
   const authDialogOpen = searchParams.get("auth") === "true";
 
   const setAuthDialogOpen = (open) => {
@@ -45,7 +44,14 @@ const Cart = () => {
       const data = await response.json();
 
       if (data.success) {
-        setCartData(data.cartData);
+        // Filter out items with missing products
+        const validCartItems = data.cartData.filter(item => item.product);
+        
+        if (validCartItems.length < data.cartData.length) {
+          toast.info("Some products are no longer available and were removed from cart");
+        }
+        
+        setCartData(validCartItems);
       } else {
         toast.error("Failed to load cart");
       }
@@ -79,7 +85,10 @@ const Cart = () => {
       const data = await response.json();
 
       if (data.success) {
-        setCartData(data.cartData);
+        // Filter out items with missing products
+        const validCartItems = data.cartData.filter(item => item.product);
+        setCartData(validCartItems);
+        
         if (newQuantity === 0) {
           toast.success("Item removed from cart");
         }
@@ -189,6 +198,9 @@ const Cart = () => {
                   src={imageUrl}
                   alt={productData.name}
                   className="w-20 sm:w-20 object-cover aspect-square rounded border border-gray-300"
+                  onError={(e) => {
+                    e.target.src = '/placeholder.png';
+                  }}
                 />
                 <div className="flex flex-col justify-center">
                   <p className="text-sm sm:text-lg font-medium text-gray-900">
@@ -215,13 +227,12 @@ const Cart = () => {
                   size="small"
                   inputProps={{ min: 1, max: 10 }}
                   value={item.quantity}
-                  onChange={(e) =>
-                    updateQuantity(
-                      item.product._id,
-                      item.size,
-                      Number(e.target.value),
-                    )
-                  }
+                  onChange={(e) => {
+                    const newQty = Number(e.target.value);
+                    if (newQty > 0 && newQty <= 10) {
+                      updateQuantity(item.product._id, item.size, newQty);
+                    }
+                  }}
                   disabled={isUpdating}
                   sx={{
                     width: "80px",
