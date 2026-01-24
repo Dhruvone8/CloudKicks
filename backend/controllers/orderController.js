@@ -16,6 +16,11 @@ const ALLOWED_ORDER_STATUSES = [
     "Delivered"
 ];
 
+const ALL_ORDER_STATUSES = [
+    "Pending Payment",
+    ...ALLOWED_ORDER_STATUSES
+];
+
 // Helper function to validate and prepare order items
 const validateAndPrepareOrderItems = async (items) => {
     const orderItems = [];
