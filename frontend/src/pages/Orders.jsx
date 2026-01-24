@@ -205,7 +205,13 @@ const Orders = () => {
                   </p>
                   <p className="text-sm text-gray-500">
                     Payment: {item.paymentMethod}
-                    {item.isPaid ? " ✓ Paid" : " - Pending"}
+                    {item.paymentMethod === "COD" ? (
+                      <span className="text-blue-600"> (Pay on Delivery)</span>
+                    ) : item.isPaid ? (
+                      <span className="text-green-600"> ✓ Paid</span>
+                    ) : (
+                      <span className="text-orange-600"> - Pending</span>
+                    )}
                   </p>
                 </div>
               </div>

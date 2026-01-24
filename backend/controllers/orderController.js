@@ -98,7 +98,7 @@ const handlePlaceOrder = async (req, res) => {
             amount: calculatedAmount,
             address,
             paymentMethod: "COD",
-            isPaid: false,
+            isPaid: true,
             status: "Order Placed"
         });
 

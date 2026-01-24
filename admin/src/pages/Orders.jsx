@@ -165,8 +165,18 @@ const Orders = ({ token }) => {
               </p>
               <p>
                 <span className="font-medium">Payment:</span>{" "}
-                <span className={order.isPaid ? "text-green-600" : "text-orange-600"}>
-                  {order.isPaid ? "Paid" : "Pending"}
+                <span className={
+                  order.paymentMethod === "COD" 
+                    ? "text-blue-600" 
+                    : order.isPaid 
+                      ? "text-green-600" 
+                      : "text-orange-600"
+                }>
+                  {order.paymentMethod === "COD" 
+                    ? "COD (On Delivery)" 
+                    : order.isPaid 
+                      ? "Paid" 
+                      : "Pending"}
                 </span>
               </p>
               <p>
@@ -187,15 +197,17 @@ const Orders = ({ token }) => {
                 onChange={(e) => statusHandler(e, order._id)}
                 className="border border-gray-300 px-3 py-2 text-sm w-full md:w-auto rounded-md cursor-pointer"
                 value={order.status}
-                disabled={!order.isPaid}
+                disabled={order.paymentMethod !== "COD" && !order.isPaid}
               >
-                {!order.isPaid && (
+                {/* Only show Pending Payment if it's an online payment that hasn't been confirmed */}
+                {order.paymentMethod !== "COD" && !order.isPaid && (
                   <option value="Pending Payment" disabled>
                     Pending Payment (Payment Required)
                   </option>
                 )}
                 
-                {order.isPaid && (
+                {/* Show regular statuses for COD or paid orders */}
+                {(order.paymentMethod === "COD" || order.isPaid) && (
                   <>
                     <option value="Order Placed">Order Placed</option>
                     <option value="Packing">Packing</option>
@@ -206,7 +218,8 @@ const Orders = ({ token }) => {
                 )}
               </select>
               
-              {!order.isPaid && (
+              {/* Show warning only for online payments that are pending */}
+              {order.paymentMethod !== "COD" && !order.isPaid && (
                 <p className="text-xs text-orange-600 mt-1">
                   ⚠️ Awaiting payment confirmation
                 </p>
