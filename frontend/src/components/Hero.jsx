@@ -1,5 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 
+// Import all hero animation frames using Vite's glob import
+const heroFrames = import.meta.glob('../assets/HeroAnimations/*.jpg', { eager: true, import: 'default' });
+
+// Sort frames by filename to ensure correct order
+const sortedFramePaths = Object.keys(heroFrames).sort();
+const frameUrls = sortedFramePaths.map(path => heroFrames[path]);
+
 const Hero = () => {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
@@ -8,18 +15,22 @@ const Hero = () => {
   const frameIndexRef = useRef(0);
   const lastFrameTimeRef = useRef(0);
 
-  const TOTAL_FRAMES = 190;
+  const TOTAL_FRAMES = frameUrls.length;
   const FRAME_DURATION = 1000 / 30; // 30fps for smooth animation
 
   useEffect(() => {
+    if (TOTAL_FRAMES === 0) {
+      console.error('No hero animation frames found');
+      return;
+    }
+
     // Preload all images
     const loadImages = async () => {
       const imagePromises = [];
 
-      for (let i = 1; i <= TOTAL_FRAMES; i++) {
+      for (let i = 0; i < TOTAL_FRAMES; i++) {
         const img = new Image();
-        const frameNumber = String(i).padStart(4, '0');
-        img.src = `/src/assets/HeroAnimations/${frameNumber}.jpg`;
+        img.src = frameUrls[i];
 
         const promise = new Promise((resolve, reject) => {
           img.onload = () => resolve(img);
@@ -27,7 +38,7 @@ const Hero = () => {
         });
 
         imagePromises.push(promise);
-        imagesRef.current[i - 1] = img;
+        imagesRef.current[i] = img;
       }
 
       try {
