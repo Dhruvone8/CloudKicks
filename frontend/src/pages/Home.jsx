@@ -9,15 +9,13 @@ const Home = () => {
   return (
     <div>
       <Hero />
-      {/* Content sections with proper padding */}
-      <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[10vw]">
-        <LatestCollections />
-        <BestSeller />
-        <Policies />
-        <Newsletter />
-      </div>
+      <LatestCollections />
+      <BestSeller />
+      <Policies />
+      <Newsletter />
     </div>
   );
 };
 
 export default Home;
+

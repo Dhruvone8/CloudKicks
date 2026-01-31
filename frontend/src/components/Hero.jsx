@@ -110,18 +110,22 @@ const Hero = () => {
   }, [imagesLoaded]);
 
   return (
-    <section ref={containerRef} className="hero-fullscreen" aria-label="Hero banner">
+    <div
+      ref={containerRef}
+      className="relative w-full bg-gray-100 border border-gray-300 overflow-hidden"
+      style={{ aspectRatio: '16/9', minHeight: '300px', maxHeight: '70vh' }}
+    >
       {!imagesLoaded && (
-        <div className="hero-loader">
-          <div className="hero-loader-spinner"></div>
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+          <div className="w-10 h-10 border-3 border-gray-300 border-t-gray-800 rounded-full animate-spin"></div>
         </div>
       )}
       <canvas
         ref={canvasRef}
-        className={`hero-canvas-fullscreen ${imagesLoaded ? 'loaded' : ''}`}
+        className={`absolute inset-0 w-full h-full transition-opacity duration-500 ${imagesLoaded ? 'opacity-100' : 'opacity-0'}`}
         aria-label="Animated product showcase"
       />
-    </section>
+    </div>
   );
 };
 
