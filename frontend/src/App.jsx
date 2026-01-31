@@ -11,7 +11,7 @@ import Orders from "./pages/Orders";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import SearchBar from "./components/SearchBar";
-import Verify from "./pages/Verify";  
+import Verify from "./pages/Verify";
 import { Toaster as SonnerToaster } from "sonner";
 
 // Scroll to top component
@@ -26,8 +26,11 @@ function ScrollToTop() {
 }
 
 const App = () => {
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
+
   return (
-    <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[10vw]">
+    <div className="app-container">
       <SonnerToaster
         richColors
         position="bottom-right"
@@ -42,8 +45,16 @@ const App = () => {
         }}
       />
       <ScrollToTop />
-      <Navbar />
+
+      {/* Navbar - positioned absolutely on home page */}
+      <div className={isHomePage ? "navbar-overlay" : "navbar-static"}>
+        <div className="navbar-container">
+          <Navbar isTransparent={isHomePage} />
+        </div>
+      </div>
+
       <SearchBar />
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/collections" element={<Collections />} />
@@ -56,7 +67,10 @@ const App = () => {
         <Route path="/orders" element={<Orders />} />
         <Route path="/verify" element={<Verify />} />
       </Routes>
-      <Footer />
+
+      <div className="content-wrapper">
+        <Footer />
+      </div>
     </div>
   );
 };

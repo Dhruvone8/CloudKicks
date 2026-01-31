@@ -4,7 +4,7 @@ import { Link, NavLink, useNavigate, useSearchParams, useLocation } from "react-
 import { ShopContext } from "../context/ShopContext";
 import AuthDialog from "./ui/authDialog";
 
-const Navbar = () => {
+const Navbar = ({ isTransparent = false }) => {
   const [visible, setVisible] = useState(false);
   const [cartCount, setCartCount] = useState(0);
 
@@ -53,10 +53,10 @@ const Navbar = () => {
 
   if (isLoading) {
     return (
-      <div className="relative z-50 flex items-center justify-between py-5 font-medium bg-white">
+      <div className={`relative z-50 flex items-center justify-between py-5 font-medium ${isTransparent ? 'bg-transparent' : 'bg-white'}`}>
         <img
           src={assets.logo}
-          className="w-19 h-12 object-contain cursor-pointer"
+          className={`w-19 h-12 object-contain cursor-pointer ${isTransparent ? 'brightness-0 invert' : ''}`}
           alt="CloudKicks Logo"
           onClick={() => (window.location.href = "/")}
         />
@@ -67,16 +67,16 @@ const Navbar = () => {
 
   return (
     <>
-      <div className="relative z-50 flex items-center justify-between py-5 font-medium bg-white">
+      <div className={`relative z-50 flex items-center justify-between py-5 font-medium ${isTransparent ? 'bg-transparent' : 'bg-white'}`}>
         <img
           src={assets.logo}
-          className="w-19 h-12 object-contain cursor-pointer"
+          className={`w-19 h-12 object-contain cursor-pointer ${isTransparent ? 'brightness-0 invert' : ''}`}
           alt="CloudKicks Logo"
           onClick={() => navigate("/")}
         />
 
         {/* DESKTOP LINKS */}
-        <ul className="hidden sm:flex gap-5 text-sm text-gray-800">
+        <ul className={`hidden sm:flex gap-5 text-sm ${isTransparent ? 'text-white' : 'text-gray-800'}`}>
           {["/", "/collections", "/about", "/contact"].map((path, i) => (
             <NavLink
               key={i}
@@ -86,7 +86,7 @@ const Navbar = () => {
               {({ isActive }) => (
                 <>
                   <p>{path === "/" ? "HOME" : path.replace("/", "").toUpperCase()}</p>
-                  <hr className={`w-2/4 h-[1.5px] bg-gray-800 border-none ${isActive ? "" : "hidden"}`} />
+                  <hr className={`w-2/4 h-[1.5px] ${isTransparent ? 'bg-white' : 'bg-gray-800'} border-none ${isActive ? "" : "hidden"}`} />
                 </>
               )}
             </NavLink>
@@ -98,17 +98,17 @@ const Navbar = () => {
           {isCollectionsPage && (
             <img
               src={assets.search_icon}
-              className="w-5 cursor-pointer"
+              className={`w-5 cursor-pointer ${isTransparent ? 'brightness-0 invert' : ''}`}
               alt="Search"
               onClick={() => setShowSearch(true)}
             />
           )}
-          
+
           {/* PROFILE DROPDOWN */}
           <div className="group relative hidden sm:block">
-            <img src={assets.profile_icon} className="w-5 cursor-pointer" alt="Profile" />
+            <img src={assets.profile_icon} className={`w-5 cursor-pointer ${isTransparent ? 'brightness-0 invert' : ''}`} alt="Profile" />
             <div className="group-hover:block hidden absolute right-0 pt-4 z-50">
-              <div className="w-36 py-3 px-5 bg-white border rounded shadow">
+              <div className="w-36 py-3 px-5 bg-white border rounded shadow text-gray-800">
                 {token ? (
                   <>
                     <p className="text-xs border-b pb-2 mb-2">Welcome, {user?.name || "User"}</p>
@@ -127,9 +127,9 @@ const Navbar = () => {
 
           {/* CART */}
           <Link to="/cart" className="relative">
-            <img src={assets.cart_icon} className="w-5" alt="Cart" />
+            <img src={assets.cart_icon} className={`w-5 ${isTransparent ? 'brightness-0 invert' : ''}`} alt="Cart" />
             {cartCount > 0 && (
-              <span className="absolute -right-1 -bottom-1 w-4 h-4 bg-black text-white text-[8px] rounded-full flex items-center justify-center">
+              <span className={`absolute -right-1 -bottom-1 w-4 h-4 ${isTransparent ? 'bg-white text-black' : 'bg-black text-white'} text-[8px] rounded-full flex items-center justify-center`}>
                 {cartCount}
               </span>
             )}
@@ -138,7 +138,7 @@ const Navbar = () => {
             href={`${import.meta.env.VITE_ADMIN_URL}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:block z-50 bg-black text-white px-4 py-2 rounded-md text-xs font-medium hover:scale-105 transition-all"
+            className={`hidden sm:block z-50 px-4 py-2 rounded-md text-xs font-medium hover:scale-105 transition-all ${isTransparent ? 'bg-white text-black' : 'bg-black text-white'}`}
           >
             Admin Panel
           </a>
@@ -146,7 +146,7 @@ const Navbar = () => {
           {/* MOBILE MENU ICON */}
           <img
             src={assets.menu_icon}
-            className="w-5 cursor-pointer sm:hidden"
+            className={`w-5 cursor-pointer sm:hidden ${isTransparent ? 'brightness-0 invert' : ''}`}
             alt="Menu"
             onClick={() => setVisible(true)}
           />

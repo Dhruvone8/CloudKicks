@@ -1,29 +1,125 @@
-import React from "react";
-import { assets } from "../assets/assets";
+import React, { useEffect, useRef, useState } from "react";
 
 const Hero = () => {
-  return (
-    <div className="flex flex-col sm:flex-row border border-gray-300 bg-white">
-      {/* Hero Left Side */}
-      <div className="w-full sm:w-1/2 flex items-center justify-center py-10 sm:py-0 px-6 sm:px-0">
-        <div className="text-gray-900">
-          <div className="flex items-center gap-2">
-            <p className="w-8 md:w-11 h-[2px] bg-gray-900"></p>
-            <p className="font-medium text-sm md:text-base text-gray-800">OUR BEST SELLERS</p>
-          </div>
-          <h1 className="prata-regular text-4xl sm:py-3 lg:text-5xl leading-tight text-gray-900">
-            Latest Arrivals
-          </h1>
-          <div className="flex items-center gap-2 mt-2">
-            <p className="font-semibold text-md md:text-lg text-gray-900">Shop Now</p>
-            <p className="w-8 md:w-11 h-[2px] bg-gray-900"></p>
-          </div>
-        </div>
-      </div>
+  const canvasRef = useRef(null);
+  const containerRef = useRef(null);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+  const imagesRef = useRef([]);
+  const frameIndexRef = useRef(0);
+  const lastFrameTimeRef = useRef(0);
 
-      {/* Hero Right Side */}
-      <img src={assets.hero_img} className="w-full sm:w-1/2" alt="Hero" />
-    </div>
+  const TOTAL_FRAMES = 190;
+  const FRAME_DURATION = 1000 / 30; // 30fps for smooth animation
+
+  useEffect(() => {
+    // Preload all images
+    const loadImages = async () => {
+      const imagePromises = [];
+
+      for (let i = 1; i <= TOTAL_FRAMES; i++) {
+        const img = new Image();
+        const frameNumber = String(i).padStart(4, '0');
+        img.src = `/src/assets/HeroAnimations/${frameNumber}.jpg`;
+
+        const promise = new Promise((resolve, reject) => {
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+        });
+
+        imagePromises.push(promise);
+        imagesRef.current[i - 1] = img;
+      }
+
+      try {
+        await Promise.all(imagePromises);
+        setImagesLoaded(true);
+      } catch (error) {
+        console.error('Error loading hero animation frames:', error);
+      }
+    };
+
+    loadImages();
+  }, []);
+
+  useEffect(() => {
+    if (!imagesLoaded || !canvasRef.current || !containerRef.current) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    let animationId;
+
+    // Function to resize canvas and draw
+    const resizeCanvas = () => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+    };
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const animate = (currentTime) => {
+      if (currentTime - lastFrameTimeRef.current >= FRAME_DURATION) {
+        const currentFrame = imagesRef.current[frameIndexRef.current];
+
+        if (currentFrame && canvas.width && canvas.height) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // Calculate dimensions to cover the canvas while maintaining aspect ratio
+          const imgRatio = currentFrame.width / currentFrame.height;
+          const canvasRatio = canvas.width / canvas.height;
+
+          let drawWidth, drawHeight, offsetX, offsetY;
+
+          if (canvasRatio > imgRatio) {
+            // Canvas is wider than image ratio - fit to width
+            drawWidth = canvas.width;
+            drawHeight = canvas.width / imgRatio;
+            offsetX = 0;
+            offsetY = (canvas.height - drawHeight) / 2;
+          } else {
+            // Canvas is taller than image ratio - fit to height
+            drawHeight = canvas.height;
+            drawWidth = canvas.height * imgRatio;
+            offsetX = (canvas.width - drawWidth) / 2;
+            offsetY = 0;
+          }
+
+          ctx.drawImage(currentFrame, offsetX, offsetY, drawWidth, drawHeight);
+        }
+
+        frameIndexRef.current = (frameIndexRef.current + 1) % TOTAL_FRAMES;
+        lastFrameTimeRef.current = currentTime;
+      }
+
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animationId = requestAnimationFrame(animate);
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+    };
+  }, [imagesLoaded]);
+
+  return (
+    <section ref={containerRef} className="hero-fullscreen" aria-label="Hero banner">
+      {!imagesLoaded && (
+        <div className="hero-loader">
+          <div className="hero-loader-spinner"></div>
+        </div>
+      )}
+      <canvas
+        ref={canvasRef}
+        className={`hero-canvas-fullscreen ${imagesLoaded ? 'loaded' : ''}`}
+        aria-label="Animated product showcase"
+      />
+    </section>
   );
 };
 
